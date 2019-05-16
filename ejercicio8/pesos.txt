@@ -1,0 +1,11 @@
+0.999925041765169 -0.0009359703766052844 0.0012166294720486932 0.011679156641626484 -0.01346605396087091 -0.00029610011302965344 0.001186202043823588 -0.0003496488341371182 0.0006097605069482054
+
+w0 ...
+w1 es la suma de las distancias verticales de todas las fichas blancas hacia la última fila libre de la punta opuesta
+w2 es lo mismo que x1 pero para las fichas negras
+w3 es la cantidad de fichas blancas que llegaron a la punta opuesta del tablero
+w4 es lo mismo que x3 pero para las fichas negras
+w5 es la cantidad de movimientos de blancas que disminuyen la distancia a la punta opuesta
+w6 es lo mismo que x5 pero para las fichas negras
+w7 la distancia de la ficha mas retrasada a la ultima posicion libre
+w8 es lo mismo que x7 pero para las fichas negras
