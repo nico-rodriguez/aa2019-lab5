@@ -2,6 +2,8 @@ from abc import abstractmethod
 import random
 from Tablero import *
 from Constantes import *
+from RedNeuronal import *
+import numpy as np
 
 class Jugador(object):
 
@@ -244,6 +246,79 @@ class AI(Jugador):
             linea_nueva += (str(elemento) + " ")
         archivo.write(linea_nueva + "\n")
         archivo.close()
+
+class Red(Jugador):
+    def __init__(self, color, red_neuronal, entrenando, directorio_instancias=None):
+        super(Red, self).__init__(color, 'Red Neuronal')
+
+        self.red_neuronal = red_neuronal
+        self.entrenando = entrenando
+        self.directorio_instancias = directorio_instancias
+        self.contador_partidas = 1
+
+    # Devuelve el tablero que resulta de efectuar la mejor jugada según la estrategia del jugador
+    def mejor_jugada(self, tablero):
+        # buscar jugada
+        fichas = tablero.negras if self.color == Color.Negras else tablero.blancas
+        valoracion_maxima = None
+        movimientos_maximos = []
+        archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+        for ficha in fichas:
+            for movimiento in tablero.posibles_movimientos(ficha):
+                nuevo_posible_tablero = tablero.copy()
+                nuevo_posible_tablero.actualizar_tablero(ficha, movimiento, self.color)
+                if nuevo_posible_tablero.hay_ganador():
+                    movimiento_maximo = movimiento
+                    ficha_maxima = ficha
+                    tablero.actualizar_tablero(ficha_maxima, movimiento_maximo, self.color)
+                    if self.entrenando:
+                        instancia = tablero.tablero2lista()
+                        instancia.append(ficha_maxima[0])
+                        instancia.append(ficha_maxima[1])
+                        instancia = np.array(instancia)
+                        instancia = instancia.reshape((instancia.shape[0], 1))
+                        self.red_neuronal.guardar_instancia(instancia, archivo_instancias)
+                        self.red_neuronal.guardar_instancia('1', archivo_instancias)
+                        self.contador_partidas += 1
+                    return
+                else:
+                    instancia = nuevo_posible_tablero.tablero2lista()
+                    instancia.append(ficha[0])
+                    instancia.append(ficha[1])
+                    instancia = np.array(instancia)
+                    instancia = instancia.reshape((instancia.shape[0], 1))
+                    valoracion = self.red_neuronal.evaluar(instancia)
+                    if valoracion_maxima is None or valoracion > valoracion_maxima:
+                        valoracion_maxima = valoracion
+                        ficha_maxima = ficha
+                        movimiento_maximo = movimiento
+                        movimientos_maximos = [(ficha_maxima, movimiento_maximo)]
+                    elif valoracion_maxima == valoracion:
+                        ficha_maxima = ficha
+                        movimiento_maximo = movimiento
+                        movimientos_maximos.append((ficha_maxima, movimiento_maximo))
+        jugada_azar = random.choice(range(0, len(movimientos_maximos)))
+        if self.entrenando:
+            instancia = tablero.tablero2lista()
+            instancia.append(jugada_azar[0])
+            instancia.append(jugada_azar[1])
+            instancia = np.array(instancia)
+            instancia = instancia.reshape((instancia.shape[0], 1))
+            self.red_neuronal.guardar_instancia(instancia, archivo_instancias)
+        tablero.actualizar_tablero(movimientos_maximos[jugada_azar][0], movimientos_maximos[jugada_azar][1], self.color)
+        return
+
+    def perdi(self, tablero):
+        if self.entrenando:
+            archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+            self.red_neuronal.guardar_instancia('-1', archivo_instancias)
+            self.contador_partidas += 1
+
+    def empate(self):
+        if self.entrenando:
+            archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+            self.red_neuronal.guardar_instancia('0', archivo_instancias)
+            self.contador_partidas += 1
 
 if __name__ == '__main__':
     jug = AI(Color.Negras, "AI1", None, True, 0.2)
