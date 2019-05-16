@@ -139,7 +139,7 @@ if __name__ == "__main__":
     print(len(res[0]))
     print(len(res[1]))
     print(len(full_data)-len(res[0])-len(res[1]))
-    print(split_dataset(np.array([[0,2],[2,4]]),0.5))
+    print(split_dataset(np.array([[1,2,3],[4,5,6],[7,8,9]]),0.5))
 '''
 	# Test get_true_party_assignment
 	labels_true = get_true_party_assignment(full_data)
