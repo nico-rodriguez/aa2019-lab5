@@ -112,10 +112,34 @@ def get_true_party_assignment(full_data):
     return party_assignment
 
 
+"""
+Given a dataset, returns two sets as numpy arrays with the percentage
+passed as a parameter of the instances as training set and the rest as 
+validation set. Returns [training_set,validation_set]
+Input:
+	- dataset is a numpy array with the instances
+    - training_percentage indicates which percentage of the instances
+    will be dedicated to training
+"""
+def split_dataset(dataset,training_percentage):
+    np.random.shuffle(dataset)
+    cant_tuples = len(dataset)
+    amount_training = round(cant_tuples*0.8)
+    training, test = dataset[:amount_training,:], dataset[amount_training:,:]
+    return [training, test]
+
+
 if __name__ == "__main__":
     full_data = parse_data()
     print(full_data)
     number_of_parties = 11
+
+    #test split_dataset
+    res = split_dataset(full_data,0.8)
+    print(len(res[0]))
+    print(len(res[1]))
+    print(len(full_data)-len(res[0])-len(res[1]))
+    print(split_dataset(np.array([[1,2,3],[4,5,6],[7,8,9]]),0.5))
 '''
 	# Test get_true_party_assignment
 	labels_true = get_true_party_assignment(full_data)
