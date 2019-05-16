@@ -1,6 +1,7 @@
 from Constantes import *
 from enum import Enum
 from math import sqrt
+import numpy as np
 
 '''
 La clase tablero contiene las posiciones del tablero, las posiciones de las
@@ -173,16 +174,7 @@ class Tablero:
 							posibles_saltos.add(nueva_pos)
 
 		return list(posibles_movimientos)
-	'''
-	#Retorna la cantidad de movimientos posibles para el jugador con color "color"
-	#Incluye movimientos "hacia atras"
-	def posibles_movimientos_jugador(self, color):
-		contador = 0
-		lista = self.negras if color == Color.Negras else self.blancas
-		for pos in lista:
-			contador += len(self.posibles_movimientos(pos))
-		return contador
-	'''
+
 	#Retorna las cantidad de movimientos posibles para el jugador con color "color", que lo acercan a la punta opuesta
 	def posiciones_disminuyen_distancia_jugador(self, color):
 		contador = 0
@@ -265,38 +257,24 @@ class Tablero:
 					print(" ", end="")
 			print()
 
+	def tablero2lista(self):
+		tablero_lista = []
+		lista_posiciones_tablero = [punta_negra, parte_media_superior, parte_media_inferior, parte_media_central, punta_blanca]
+		for lista_posiciones in lista_posiciones_tablero:
+			for pos in lista_posiciones:
+				if pos in self.blancas:
+					tablero_lista.append(1)
+				elif pos in self.negras:
+					tablero_lista.append(-1)
+				else:
+					tablero_lista.append(0)
+		return tablero_lista
+
 # Para debuggeing
 if __name__ == '__main__':
 	tablero = Tablero()
 	tablero.imprimir_tablero()
 
-	print("Posiciones adyacentes")
-	print("(-8,0): {pos}".format(pos=tablero.posiciones_adyacentes((-8,0))))
-	assert tablero.posiciones_adyacentes((-8,0)) == ([], [(-7, -1), (-7, 1)])
-	print("(-6,0): {pos}".format(pos=tablero.posiciones_adyacentes((-6,0))))
-	assert tablero.posiciones_adyacentes((-6,0)) == ([], [(-5, -1), (-5, 1), (-6, -2), (-6, 2), (-7, -1), (-7, 1)])
-	print("(-5,1): {pos}".format(pos=tablero.posiciones_adyacentes((-5,1))))
-	assert tablero.posiciones_adyacentes((-5,1)) == ([(-4, 0), (-4, 2)], [(-5, -1), (-5, 3), (-6, 0), (-6, 2)])
-
-	print("Posibles movimientos")
-	tablero.imprimir_tablero_con_fichas()
-	print("(-8,0) => {pos}".format(pos=tablero.posibles_movimientos((-8,0))))
-	assert tablero.posibles_movimientos((-8,0)) == []
-	print("(-6,0) => {pos}".format(pos=tablero.posibles_movimientos((-6,0))))
-	assert tablero.posibles_movimientos((-6,0)) == [(-4, 2), (-4, -2)]
-	print("(-5,1) => {pos}".format(pos=tablero.posibles_movimientos((-5,1))))
-	assert tablero.posibles_movimientos((-5,1)) == [(-4, 2), (-4, 0)]
-
-	# Testear posibles_movimientos cuando hay varios saltos
-	tablero.negras.append((-4,0))
-	print("Agregada negra en (-4,0)")
-	tablero.blancas.append((-2,0))
-	print("Agregada blanca en (-2,0)")
-	tablero.imprimir_tablero_con_fichas()
-	print("(-5,1) => {pos}".format(pos=tablero.posibles_movimientos((-5,1))))
-	assert tablero.posibles_movimientos((-5,1)) == [(-3, -1), (-4, 2), (-1, 1)]
-	tablero.blancas.remove((-5,1))
-	print("Quitada blanca en (-5,1)")
-	tablero.imprimir_tablero_con_fichas()
-	print("(-7,-1) => {pos}".format(pos=tablero.posibles_movimientos((-7,-1))))
-	assert tablero.posibles_movimientos((-7,-1)) == [(-3, -1), (-1, 1), (-5, 1)]
+	arr = tablero.tablero2lista()
+	print(arr)
+	print(len(arr))
