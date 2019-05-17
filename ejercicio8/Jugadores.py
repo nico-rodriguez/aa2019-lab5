@@ -287,7 +287,7 @@ class Red(Jugador):
                     instancia.append(ficha[1])
                     instancia = np.array(instancia)
                     instancia = instancia.reshape((instancia.shape[0], 1))
-                    valoracion = self.red_neuronal.evaluar(instancia)
+                    valoracion = self.red_neuronal.forwardpropagation(instancia)
                     if valoracion_maxima is None or valoracion > valoracion_maxima:
                         valoracion_maxima = valoracion
                         ficha_maxima = ficha
