@@ -1,7 +1,7 @@
-from Constantes import *
+from ejercicio8.Constantes import *
 from enum import Enum
 from math import sqrt
-import numpy as np
+
 
 '''
 La clase tablero contiene las posiciones del tablero, las posiciones de las

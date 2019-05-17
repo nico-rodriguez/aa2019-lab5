@@ -1,6 +1,4 @@
-from Jugadores import *
-from Constantes import *
-from Tablero import *
+from ejercicio8.Tablero import *
 
 class Juego:
 

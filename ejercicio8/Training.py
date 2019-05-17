@@ -1,10 +1,8 @@
-from Juego import *
-from Jugadores import *
-import Graficar
+from ejercicio8.Juego import *
+from ejercicio8.Jugadores import *
 import sys
 import os
-import numpy as np
-import RedNeuronal
+import ejercicio8.RedNeuronal as RedNeuronal
 
 uso = """
 Invocar como python3 Training.py [nombre directorio] [pesos red] [oponente] [numero de partidas] donde:

@@ -8,7 +8,7 @@
 #momentum
 
 import numpy as np
-import Utils
+import ejercicio8.Utils as Utils
 
 class RedNeuronal(object):
 	def __init__(self, neuronas, activation_function='tanh', batch_size=1, learning_rate=None,

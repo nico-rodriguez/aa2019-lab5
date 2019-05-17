@@ -1,8 +1,6 @@
 from abc import abstractmethod
 import random
-from Tablero import *
-from Constantes import *
-from RedNeuronal import *
+from ejercicio8.Tablero import *
 import numpy as np
 
 class Jugador(object):
