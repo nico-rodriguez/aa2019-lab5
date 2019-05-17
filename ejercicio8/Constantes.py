@@ -3,7 +3,6 @@
 # llegó a la punta opuesta o todavía no salio de la punta propia
 punta_negra = []
 punta_blanca = []
-#parte_media = []
 parte_media_superior = []
 parte_media_inferior = []
 parte_media_central = []
