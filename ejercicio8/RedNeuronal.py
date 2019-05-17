@@ -19,7 +19,7 @@ class RedNeuronal(object):
 		for i in range(len(neuronas)-1):
 			neuronas_capa_acutal = neuronas[i] + 1  # Considerar la neurona de sesgo
 			neuronas_capa_siguiente = neuronas[i + 1]
-			self.capas.append(np.random.rand(neuronas_capa_siguiente, neuronas_capa_acutal))
+			self.capas.append(np.random.randn(neuronas_capa_siguiente, neuronas_capa_acutal))
 		print('[-] Red neuronal inicializada')
 
 		self.activation_function = activation_function
@@ -27,12 +27,18 @@ class RedNeuronal(object):
 	# Recibe una instancia y devuelve una valoración del tablero.
 	def forwardpropagation(self, input):
 		x = np.array(input).reshape(len(input), 1)
-		for capa in self.capas:
+		# Aplicar la función de acivación seleccionada en cada capa intermedia
+		for i in range(len(self.capas)-1):
+			capa = self.capas[i]
 			x = np.vstack([1, x])
 			if self.activation_function == 'sigmoid':
 				x = Utils.sigmoid(capa.dot(x))
 			elif self.activation_function == 'tanh':
 				x = Utils.tanh(capa.dot(x))
+		# Aplicar siempre tanh a la última capa, para obtener un resultado en [-1,1]
+		ultima_capa = self.capas[-1]
+		x = np.vstack([1, x])
+		x = Utils.tanh(ultima_capa.dot(x))
 		return x
 
 	# Guardar la instancia actual (tablero + movimiento realizado) en el archivo
