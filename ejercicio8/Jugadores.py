@@ -253,6 +253,7 @@ class Red(Jugador):
         self.entrenando = entrenando
         self.directorio_instancias = directorio_instancias
         self.contador_partidas = 1
+        self.partida = []
 
     # Devuelve el tablero que resulta de efectuar la mejor jugada según la estrategia del jugador
     def mejor_jugada(self, tablero):
@@ -273,10 +274,10 @@ class Red(Jugador):
                         instancia = tablero.tablero2lista()
                         instancia.append(ficha_maxima[0])
                         instancia.append(ficha_maxima[1])
-                        instancia = np.array(instancia)
-                        instancia = instancia.reshape((instancia.shape[0], 1))
-                        self.red_neuronal.guardar_instancia(instancia, archivo_instancias)
-                        self.red_neuronal.guardar_instancia('1', archivo_instancias)
+                        self.partida.append(instancia)
+                        self.partida.append('1')
+                        self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+                        self.partida = []
                         self.contador_partidas += 1
                     return
                 else:
@@ -300,22 +301,24 @@ class Red(Jugador):
             instancia = tablero.tablero2lista()
             instancia.append(jugada_azar[0])
             instancia.append(jugada_azar[1])
-            instancia = np.array(instancia)
-            instancia = instancia.reshape((instancia.shape[0], 1))
-            self.red_neuronal.guardar_instancia(instancia, archivo_instancias)
+            self.partida.append(instancia)
         tablero.actualizar_tablero(movimientos_maximos[jugada_azar][0], movimientos_maximos[jugada_azar][1], self.color)
         return
 
     def perdi(self, tablero):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
-            self.red_neuronal.guardar_instancia('-1', archivo_instancias)
+            self.partida.append('-1')
+            self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+            self.partida = []
             self.contador_partidas += 1
 
     def empate(self):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
-            self.red_neuronal.guardar_instancia('0', archivo_instancias)
+            self.partida.append('0')
+            self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+            self.partida = []
             self.contador_partidas += 1
 
 if __name__ == '__main__':
