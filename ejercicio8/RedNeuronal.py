@@ -106,13 +106,12 @@ class RedNeuronal(object):
 			y *= self.factor_descuento
 			if iter - self.batch_size < 0:
 				batch = instancias[0:iter, :]
-				y = y[-iter:]
+				y = y[:, -iter:]
 			else:
 				batch = instancias[iter - self.batch_size:iter, :]
 
 			y1 = self.forwardpropagation(batch)
 			z = self.forwardpropagation_z(instancias[iter-1])
-			print(batch)
 			# Ajustar el error en la capa de salida
 			capa_salida = self.capas[-1]
 			delta_salida = (y1 - y) * Utils.d_tanh(z[-1])  # Producto componente a componente
@@ -120,7 +119,6 @@ class RedNeuronal(object):
 
 			# Ajustar pesos de la capa de salida
 			gradiente = delta_salida
-			print(gradiente)
 			if self.activation_function == 'sigmoid':
 				gradiente *= Utils.sigmoid(z[-1])
 			elif self.activation_function == 'tanh':
@@ -129,7 +127,6 @@ class RedNeuronal(object):
 				raise Exception('RedNeuronal.py: invalid activation function in backpropagation')
 			self.descenso_gradiente(capa_salida, gradiente)
 
-			print('    Output loss: {err}'.format(err=delta_salida))
 			total_loss += delta_salida
 			# Ajustar el error en las capas intermedias
 			delta_l_anterior = delta_salida
@@ -153,8 +150,9 @@ class RedNeuronal(object):
 				# Ajustar pesos de la capa actual
 				self.descenso_gradiente(capa_l, gradiente)
 
-			print('    Total loss: {err}'.format(err=total_loss))
-			print('    Avg. loss: {err}'.format(err=total_loss / self.numero_neuronas))
+		print('    Output loss: {err}'.format(err=delta_salida))
+		print('    Total loss: {err}'.format(err=total_loss))
+		print('    Avg. loss: {err}'.format(err=total_loss / self.numero_neuronas))
 		return delta_salida, total_loss, total_loss / self.numero_neuronas
 
 	def descenso_gradiente(self, pesos, gradiente):
@@ -204,5 +202,5 @@ if __name__ == '__main__':
 	print(z[-1].shape)
 
 	# Test backpropagation
-	red = RedNeuronal([4, 3, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
-	red.backpropagation('test.npz-1')
+	red = RedNeuronal([85, 10, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
+	red.backpropagation('partida1.npz0')
