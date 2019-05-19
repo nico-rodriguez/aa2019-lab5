@@ -320,11 +320,3 @@ class Red(Jugador):
             self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
             self.contador_partidas += 1
-
-if __name__ == '__main__':
-    jug = AI(Color.Negras, "AI1", None, True, 0.2)
-    jug.cargar_pesos("pesos.txt")
-    print(jug.pesos)
-    jug.alternar_pesos()
-    print(jug.pesos)
-    
