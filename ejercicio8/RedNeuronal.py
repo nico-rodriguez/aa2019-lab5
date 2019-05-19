@@ -180,11 +180,11 @@ if __name__ == '__main__':
 	print(red3.forwardpropagation(x))
 
 	# Test guardar_partida y cargar_partida
-	red = RedNeuronal([4, 3, 1])
+	# red = RedNeuronal([4, 3, 1])
 	# red.guardar_partida([[1, 2, 3, 4], [5, 6, 7, 8], [1, 3, 5, 7], [2, 4, 6, 8], '-1'], 'test.npz')
-	resultado, instancias = red.cargar_partida('test.npz-1')
-	print(resultado)
-	print(instancias)
+	# resultado, instancias = red.cargar_partida('test.npz-1')
+	# print(resultado)
+	# print(instancias)
 
 	# Test fordwardpropagation_z
 	x = [[1, 2, 3], [0, 0, 0]]
