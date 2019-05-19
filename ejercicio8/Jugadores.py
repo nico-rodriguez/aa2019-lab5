@@ -261,7 +261,7 @@ class Red(Jugador):
         fichas = tablero.negras if self.color == Color.Negras else tablero.blancas
         valoracion_maxima = None
         movimientos_maximos = []
-        archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+        archivo_instancias = self.directorio_instancias + '/partida{val}'.format(val=self.contador_partidas)
         for ficha in fichas:
             for movimiento in tablero.posibles_movimientos(ficha):
                 nuevo_posible_tablero = tablero.copy()
@@ -305,7 +305,7 @@ class Red(Jugador):
 
     def perdi(self, tablero):
         if self.entrenando:
-            archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+            archivo_instancias = self.directorio_instancias + '/partida{val}'.format(val=self.contador_partidas)
             self.partida.append('-1')
             self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
@@ -313,7 +313,7 @@ class Red(Jugador):
 
     def empate(self):
         if self.entrenando:
-            archivo_instancias = self.directorio_instancias + 'partida{val}'.format(val=self.contador_partidas)
+            archivo_instancias = self.directorio_instancias + '/partida{val}'.format(val=self.contador_partidas)
             self.partida.append('0')
             self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
