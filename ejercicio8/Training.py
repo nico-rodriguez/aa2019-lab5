@@ -3,13 +3,24 @@ from ejercicio8.Jugadores import *
 import sys
 import os
 import ejercicio8.RedNeuronal as RedNeuronal
+import ejercicio8.Utils as Utils
+import ast
 
 uso = """
-Invocar como python3 Training.py [nombre directorio] [pesos red] [oponente] [numero de partidas] donde:
--'pesos red' es el archivo con los pesos de la red neuronal.
--'oponente' puede ser una ruta a un archivo con pesos o "Aleatorio".
--'nombre directorio' es el nombre del directorio en donde se guardan los resultados.
-Los pesos deben estar escritos en una sola línea y separados por espacios.
+Invocar como python3 Training.py [config file]. El módulo recibe los parámetros de entrada desde el archivo de configuración.
+En ese archivo, cada argumento se define en una línea a parte.
+El formato del archivo es el siguiente:
+[nombre directorio]     #nombre del directorio en donde se guardan los resultados
+[oponente]              #ruta a un archivo con pesos o "Aleatorio"
+[número de partidas]    #cantidad de partidas de entrenamiento
+[pesos red]             #archivo con los pesos de la red neuronal o una lista con la cantidad de neuronas de cada capa
+                        #(sin incluir las neuronas de sesgo).
+[función de activación] #'tanh' o 'sigmoid'
+[factor de descuento]   #factor de descuento de la función Q
+[batch size]            #tamaño del batch para el aprendizaje
+[learning rate]         #taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente)
+[regularization]        #factor de regularización de los pesos de la red
+[momentum]              #factor de momentum para la actualización de los pesos en el descenso por gradiente
 """
 
 '''
@@ -18,20 +29,66 @@ Imprime en consola el número de partidas ganadas por el jugador que usa la red 
 '''
 
 if __name__ == '__main__':
-    #Chequear número y valores de los argumentos
-    if not(len(sys.argv) == 3):
-        print("***Número incorrecto de parámetros***")
+    directorio, oponente, num_partidas, red, activation_function, discount_rate,\
+    batch_size, learning_rate, regularization, momentum = Utils.parsear_conf('Training.conf')
+
+    if oponente != 'Aleatorio' and not os.path.isfile(oponente):
+        print("***Valor incorrecto para el oponente. Debe ser 'Aleatorio' o un archivo con los pesos de una AI***")
         print(uso)
         exit()
 
-    directorio = sys.argv[1]
-    pesos_red = sys.argv[2]
-    oponente = sys.argv[3]
-    num_partidas = int(sys.argv[4])
+    num_partidas = int(num_partidas)
+    if num_partidas <= 0:
+        print("***Valor incorrecto para el número de partidas. Debe ser un entero positivo***")
+        print(uso)
+        exit()
+    if not os.path.isfile(red):
+        red = ast.literal_eval(red)
+        if isinstance(red, str):
+            print("***Valor incorrecto para la red neuronal. Debe ser una lista con la cantidad de neuronas en cada" +
+                  " capa (sin contar neuronas de sesgo) o un archivo con los valores de cada peso***")
+            print(uso)
+            exit()
+
+    if activation_function != 'tanh' and activation_function != 'sigmoid':
+        print('***Valor incorrecto de función de activación. Debe ser "tanh" o "sigmoid"***')
+        print(uso)
+        exit()
+
+    discount_rate = float(discount_rate)
+    if discount_rate < 0 or discount_rate > 1:
+        print('***Valor incorrecto de tasa de descuento. Debe ser un valor entre 0 y 1***')
+        print(uso)
+        exit()
+
+    batch_size = int(batch_size)
+    if batch_size <= 0:
+        print('***Valor incorrecto de tamaño de batch. Debe ser positivo***')
+        print(uso)
+        exit()
+
+    learning_rate = float(learning_rate)
+    if learning_rate < 0 or learning_rate > 1:
+        print('***Valor incorrecto de tasa de aprendizaje. Debe ser un valor entre 0 y 1***')
+        print(uso)
+        exit()
+
+    regularization = float(regularization)
+    if regularization < 0:
+        print('***Valor incorrecto de tasa de regularización. Debe ser un valor positivo***')
+        print(uso)
+        exit()
+
+    momentum = float(momentum)
+    if momentum < 0 or momentum > 1:
+        print('***Valor incorrecto de tasa de momentum. Debe ser un valor entre 0 y 1***')
+        print(uso)
+        exit()
+
 
     print("[*] Creando jugadores")
     print('[*] Cargando los pesos de la red neuronal')
-    red_neuronal = RedNeuronal.cargar_red(pesos_red)
+    red_neuronal = RedNeuronal.RedNeuronal(red, activation_function, discount_rate, batch_size, learning_rate, regularization, momentum)
     jugador1 = Red(Color.Blancas, red_neuronal, True, directorio)
     if oponente != "Aleatorio":
         jugador2 = AI(Color.Negras, "AI", None, False, 0)
@@ -50,7 +107,8 @@ if __name__ == '__main__':
     empates = 0
 
     # Crear un directorio para guardar los datos de entrenamiento
-    os.mkdir(directorio)
+    if not os.path.isdir(directorio):
+        os.mkdir(directorio)
     print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
     # Almacena la cantidad de victorias cada 10, 20, 30 ... partidas
@@ -80,5 +138,5 @@ if __name__ == '__main__':
         print("[-] Victorias = {victorias}".format(victorias=victorias))
         print("[-] Empates = {empates}".format(empates=empates))
 
-    print("[*] La AI ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
-    print("[*] La AI empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))
+    print("[*] La Red Neuronal ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
+    print("[*] La Red Neuronal empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))
