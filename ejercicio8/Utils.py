@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 """
 Aplicar la función Sigmoide a cada elemento de un arreglo numpy.
@@ -54,3 +55,19 @@ def reshape_array(arr):
 	else:
 		raise Exception('Utils.py: invalid array dimension in reshape_array')
 	return arr
+
+
+"""
+Parsear un archivo de configuración en donde los argumentos para el programa se encuentran uno en cada línea, antes
+de un conjunto de tabulaciones.
+"""
+def parsear_conf(archivo_conf):
+	with open(archivo_conf, 'r') as conf:
+		conf_lines = conf.readlines()
+	params = []
+	for line in conf_lines:
+		params.append(re.match(r'^(.+)\s+#', line)[1].strip())
+	return params
+
+if __name__ == '__main__':
+	print(parsear_conf('Training.conf'))
