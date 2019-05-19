@@ -10,15 +10,19 @@ class RedNeuronal(object):
 	def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, batch_size=10,
 				 learning_rate=0.01, regularization=0.5, momentum=0.9):
 		# Inicializar capas y neuronas de la red
-		print('[-] Inicializando neuronas de la red con valores aleatorios')
-		self.capas = []
-		for i in range(len(neuronas)-1):
-			neuronas_capa_acutal = neuronas[i] + 1  # Considerar la neurona de sesgo
-			neuronas_capa_siguiente = neuronas[i + 1]
-			capa = np.random.randn(neuronas_capa_siguiente, neuronas_capa_acutal)
-			# Inicialización de Xavier/He
-			capa = capa * np.sqrt(2 / (neuronas_capa_acutal + neuronas_capa_siguiente))
-			self.capas.append(capa)
+		if not isinstance(neuronas, str):
+			print('[-] Inicializando neuronas de la red con valores aleatorios')
+			self.capas = []
+			for i in range(len(neuronas)-1):
+				neuronas_capa_acutal = neuronas[i] + 1  # Considerar la neurona de sesgo
+				neuronas_capa_siguiente = neuronas[i + 1]
+				capa = np.random.randn(neuronas_capa_siguiente, neuronas_capa_acutal)
+				# Inicialización de Xavier/He
+				capa = capa * np.sqrt(2 / (neuronas_capa_acutal + neuronas_capa_siguiente))
+				self.capas.append(capa)
+		else:
+			print('[-] Inicializando neuronas de la red con valores del archivo {file}'.format(file=neuronas))
+			self.capas = cargar_red(neuronas)
 		print('[-] Red neuronal inicializada')
 
 		self.activation_function = activation_function
