@@ -1,6 +1,5 @@
 from ejercicio8.Juego import *
 from ejercicio8.Jugadores import *
-import sys
 import os
 import ejercicio8.RedNeuronal as RedNeuronal
 import ejercicio8.Utils as Utils
@@ -19,8 +18,9 @@ El formato del archivo es el siguiente:
 [factor de descuento]   #factor de descuento de la función Q
 [batch size]            #tamaño del batch para el aprendizaje
 [learning rate]         #taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente)
-[regularization]        #factor de regularización de los pesos de la red
-[momentum]              #factor de momentum para la actualización de los pesos en el descenso por gradiente
+[regularization]        #factor de regularización de los pesos de la red (0 para deshabilitar)
+[momentum]              #factor de momentum para la actualización de los pesos en el descenso por gradiente (0 para deshabilitar)
+[epsilon]               #valor de epsilon para el gradient checking (0 para deshabilitar). El gradien checking se hace cada 50 jugadas
 """
 
 '''
@@ -30,18 +30,25 @@ Imprime en consola el número de partidas ganadas por el jugador que usa la red 
 
 if __name__ == '__main__':
     directorio, oponente, num_partidas, red, activation_function, discount_rate,\
-    batch_size, learning_rate, regularization, momentum = Utils.parsear_conf('Training.conf')
+    batch_size, learning_rate, regularization, momentum, epsilon = Utils.parsear_conf('Training.conf')
 
     if oponente != 'Aleatorio' and not os.path.isfile(oponente):
         print("***Valor incorrecto para el oponente. Debe ser 'Aleatorio' o un archivo con los pesos de una AI***")
         print(uso)
         exit()
+    elif oponente == 'Aleatorio':
+        print('[*] Oponente aleatorio seleccionado')
+    else:
+        print('[*] Oponente AI seleccionado')
 
     num_partidas = int(num_partidas)
     if num_partidas <= 0:
         print("***Valor incorrecto para el número de partidas. Debe ser un entero positivo***")
         print(uso)
         exit()
+    else:
+        print('[*] Se jugarán {num} partidas de entrenamiento'.format(num=num_partidas))
+
     if not os.path.isfile(red):
         red = ast.literal_eval(red)
         if isinstance(red, str):
@@ -49,42 +56,75 @@ if __name__ == '__main__':
                   " capa (sin contar neuronas de sesgo) o un archivo con los valores de cada peso***")
             print(uso)
             exit()
+        else:
+            print('[*] Se creará una red neuronal con capas {capas}'.format(capas=red))
+    else:
+        print('[*] Se cargará una red neuronal desde el archivo {file}'.format(file=red))
 
     if activation_function != 'tanh' and activation_function != 'sigmoid':
         print('***Valor incorrecto de función de activación. Debe ser "tanh" o "sigmoid"***')
         print(uso)
         exit()
+    else:
+        print('[*] Función de activación {fun} seleccionada'.format(fun=activation_function))
 
     discount_rate = float(discount_rate)
-    if discount_rate < 0 or discount_rate > 1:
-        print('***Valor incorrecto de tasa de descuento. Debe ser un valor entre 0 y 1***')
+    if discount_rate < 0 or discount_rate >= 1:
+        print('***Valor incorrecto de tasa de descuento. Debe ser un valor entre 0 y 1 (inclusive 1)***')
         print(uso)
         exit()
+    else:
+        print('[*] Tasa de descuento establecida en {tasa}'.format(tasa=discount_rate))
 
     batch_size = int(batch_size)
     if batch_size <= 0:
         print('***Valor incorrecto de tamaño de batch. Debe ser positivo***')
         print(uso)
         exit()
+    else:
+        print('[*] Tamaño de batch establecida en {batch}'.format(batch=batch_size))
 
     learning_rate = float(learning_rate)
     if learning_rate < 0 or learning_rate > 1:
-        print('***Valor incorrecto de tasa de aprendizaje. Debe ser un valor entre 0 y 1***')
+        print('***Valor inapropiado de tasa de aprendizaje. Se recomienda un valor entre 0 y 1***')
         print(uso)
         exit()
+    else:
+        print('[*] Tasa de aprendizaje establecida en {tasa}'.format(tasa=learning_rate))
 
     regularization = float(regularization)
     if regularization < 0:
-        print('***Valor incorrecto de tasa de regularización. Debe ser un valor positivo***')
+        print('***Valor incorrecto de tasa de regularización. Debe ser un valor positivo (o cero para deshabilitar esta funcionalidad)***')
         print(uso)
         exit()
+    elif regularization == 0:
+        print('[*] Tasa de regularización establecida en cero. No se utilizará regularización durante el aprendizaje!')
+    else:
+        print('[*] Tasa de regularización establecida en {tasa}'.format(tasa=regularization))
 
     momentum = float(momentum)
-    if momentum < 0 or momentum > 1:
-        print('***Valor incorrecto de tasa de momentum. Debe ser un valor entre 0 y 1***')
+    if momentum <= 0 or momentum > 1:
+        print('***Valor incorrecto de tasa de momentum. Debe ser un valor entre 0 y 1 (o cero para deshabilitar esta funcionalidad)***')
         print(uso)
         exit()
+    elif momentum == 0:
+        print('[*] Valor de momentum establecido en cero. No se utilizará momentum durante el aprendizaje!')
+    else:
+        print('[*] Valor de momentum establecido en {tasa}'.format(tasa=momentum))
 
+    epsilon = float(epsilon)
+    if momentum < 1e-8 or momentum > 1:
+        print('***Valor inapropiado para el epsilon del Gradient Checking. Se recomienda un valor entre 1e-8 y 1 (o cero para deshabilitar esta funcionalidad)***')
+        print(uso)
+        exit()
+    elif epsilon == 0:
+        print('[*] Valor de epsilon para el gradient checking establecido en cero. No se utilizará gradient checking momentum durante el aprendizaje!')
+    else:
+        print('[*] Valor de epsilon para el gradient checking establecido en {epsilon}'.format(epsilon=epsilon))
+
+    input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
+    if len(input_key) > 0 and input_key[0] == 'q':
+        exit()
 
     print("[*] Creando jugadores")
     print('[*] Cargando los pesos de la red neuronal')
@@ -95,7 +135,6 @@ if __name__ == '__main__':
         print("[*] Cargando pesos de la AI oponente")
         jugador2.cargar_pesos(oponente)
         jugador2.alternar_pesos()
-    # Solo el primero es AI
     elif oponente == "Aleatorio":
         jugador2 = Aleatorio(Color.Negras, "Aleatorio")
     else:
@@ -111,18 +150,8 @@ if __name__ == '__main__':
         os.mkdir(directorio)
     print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
-    # Almacena la cantidad de victorias cada 10, 20, 30 ... partidas
-    evolucion_victorias = []
-    # Almacena la cantidad de empates cada 10, 20, 30 ... partidas
-    evolucion_empates = []
-    evolucion_victorias_formateado = []
-    evolucion_empates_formateado = []
-    victorias_aux = None
-    empates_aux = None
-    partidos_desde_ultimo_ajuste = 0
-    color_que_empieza = Color.Blancas
-
     print("[*] Comenzando la serie de partidas")
+    color_que_empieza = Color.Blancas
     for i in range(num_partidas):
         print("[-] Comenzando partida {num}".format(num=i+1))
         resultado = ''
