@@ -41,36 +41,30 @@ class RedNeuronal(object):
 		for i in range(len(self.capas)-1):
 			capa = self.capas[i]
 			x = Utils.extend_array(x)
-			if self.activation_function == 'sigmoid':
-				x = Utils.sigmoid(capa.dot(x))
-			elif self.activation_function == 'tanh':
-				x = Utils.tanh(capa.dot(x))
+			x = Utils.activation_function(self.activation_function, capa.dot(x))
 		# Aplicar siempre tanh a la última capa, para obtener un resultado en [-1,1]
 		ultima_capa = self.capas[-1]
 		x = Utils.extend_array(x)
 		x = Utils.tanh(ultima_capa.dot(x))
 		return x
 
-	# Recibe una instancia y devuelve una lista con los valores z de cada capa.
-	def forwardpropagation_z(self, input):
+	# Recibe una instancia y devuelve una lista con los valores de activación de cada capa.
+	def forwardpropagation_a(self, input):
 		x = np.array(input)
 		x = Utils.reshape_array(x)
-		z = [x]
+		a = [x]
 		# Aplicar la función de acivación seleccionada en cada capa intermedia
 		for i in range(len(self.capas) - 1):
 			capa = self.capas[i]
 			x = Utils.extend_array(x)
-			z_actual = capa.dot(x)
-			z.append(z_actual)
-			if self.activation_function == 'sigmoid':
-				x = Utils.sigmoid(z_actual)
-			elif self.activation_function == 'tanh':
-				x = Utils.tanh(z_actual)
+			x = Utils.activation_function(self.activation_function, capa.dot(x))
+			a.append(x)
+		# Aplicar siempre tanh a la última capa, para obtener un resultado en [-1,1]
 		ultima_capa = self.capas[-1]
 		x = Utils.extend_array(x)
-		z_actual = ultima_capa.dot(x)
-		z.append(z_actual)
-		return z
+		x = Utils.tanh(ultima_capa.dot(x))
+		a.append(x)
+		return a
 
 	# Guardar la partida actual (tableros + movimientos realizados) en el archivo
 	def guardar_partida(self, partida, archivo_instancias):
@@ -91,7 +85,8 @@ class RedNeuronal(object):
 		return resultado, instancias
 
 	# Aplicar el algoritmo de backpropagation sobre el archivo de instancias seleccionado.
-	# Devuelve el error que se cometió en la capa de salida, el error total de la red y el error promedio.
+	# Devuelve el error total y promedio que se cometió en la evaluación, junto con el error total y promedio
+	# de las capas de la red.
 	def backpropagation(self, archivo_instancias):
 		print('[-] Comenzando backpropagation')
 		resultado, instancias = self.cargar_partida(archivo_instancias)
@@ -100,59 +95,43 @@ class RedNeuronal(object):
 		y = [(resultado*self.factor_descuento)**(self.batch_size-i) for i in range(self.batch_size-1)]
 		y.append(resultado)
 		y = np.array(y).reshape(1, len(y))
+		total_delta = 0
+		total_loss = 0
 		for iter in range(numero_instancias, 0, -1):
-			total_loss = 0
 			# Calcular el (mini) batch para la instancia número 'iter'
-			y *= self.factor_descuento
 			if iter - self.batch_size < 0:
 				batch = instancias[0:iter, :]
 				y = y[:, -iter:]
 			else:
 				batch = instancias[iter - self.batch_size:iter, :]
 
-			y1 = self.forwardpropagation(batch)
-			z = self.forwardpropagation_z(instancias[iter-1])
 			# Ajustar el error en la capa de salida
-			capa_salida = self.capas[-1]
-			delta_salida = (y1 - y) * Utils.d_tanh(z[-1])  # Producto componente a componente
+			a = self.forwardpropagation_a(instancias[iter-1])
+			y1 = self.forwardpropagation(batch)
+			total_loss += np.average(y1 - y)
+			delta_salida = np.average(y1 - y) * Utils.d_tanh(a[-1])  # Producto componente a componente
 			delta_salida = np.average(delta_salida)
+			total_delta += delta_salida
 
-			# Ajustar pesos de la capa de salida
-			gradiente = delta_salida
-			if self.activation_function == 'sigmoid':
-				gradiente *= Utils.sigmoid(z[-1])
-			elif self.activation_function == 'tanh':
-				gradiente *= Utils.tanh(z[-1])
-			else:
-				raise Exception('RedNeuronal.py: invalid activation function in backpropagation')
-			self.descenso_gradiente(capa_salida, gradiente)
-
-			total_loss += delta_salida
-			# Ajustar el error en las capas intermedias
+			# Ajustar los pesos de cada capa
 			delta_l_anterior = delta_salida
-			for l in range(len(self.capas) - 2, 0, -1):
+			for l in range(len(self.capas) - 1, -1, -1):
 				# Calcular delta de la capa actual
-				capa_l = self.capas[l]
+				capa_l = self.capas[l][:, 1:]
 				delta_l_actual = capa_l.T.dot(delta_l_anterior)
-				if self.activation_function == 'sigmoid':
-					delta_l_actual *= Utils.d_sigmoid(z[l])
-				elif self.activation_function == 'tanh':
-					delta_l_actual *= Utils.d_tanh(z[l])
-				else:
-					raise Exception('RedNeuronal.py: invalid activation function in backpropagation')
+				delta_l_actual *= Utils.d_activation_function(self.activation_function, a[l])
+				total_delta += np.sum(delta_l_actual)
 				# Calcular el gradiente sobre los pesos de la capa actual
-				if self.activation_function == 'sigmoid':
-					gradiente = delta_l_actual * Utils.sigmoid(z[l-1])
-				elif self.activation_function == 'tanh':
-					gradiente = gradiente * Utils.tanh(z[l-1])
-				else:
-					raise Exception('RedNeuronal.py: invalid activation function in backpropagation')
+				gradiente = delta_l_actual * a[l]
 				# Ajustar pesos de la capa actual
-				self.descenso_gradiente(capa_l, gradiente)
+				self.descenso_gradiente(capa_l, gradiente.T)
+				delta_l_anterior = delta_l_actual
+			y *= self.factor_descuento
 
-		print('    Output loss: {err}'.format(err=delta_salida))
 		print('    Total loss: {err}'.format(err=total_loss))
-		print('    Avg. loss: {err}'.format(err=total_loss / self.numero_neuronas))
+		print('    Avg. loss: {err}'.format(err=total_loss / numero_instancias))
+		print('    Total delta: {err}'.format(err=total_delta))
+		print('    Avg. delta: {err}'.format(err=total_delta / (self.numero_neuronas + numero_instancias)))
 		return delta_salida, total_loss, total_loss / self.numero_neuronas
 
 	def descenso_gradiente(self, pesos, gradiente):
@@ -172,35 +151,10 @@ def cargar_red(archivo_pesos):
 	pass
 
 if __name__ == '__main__':
-	# Test forwardpropagation
-	x = [[1, 2, 3], [0, 0, 0]]
-	red1 = RedNeuronal([3, 3, 1])
-	print(red1.forwardpropagation(x))
-	red2 = RedNeuronal([3, 1])
-	print(red2.forwardpropagation(x))
-	red3 = RedNeuronal([3, 7, 9, 8, 5, 2])
-	print(red3.forwardpropagation(x))
-
-	# Test guardar_partida y cargar_partida
-	# red = RedNeuronal([4, 3, 1])
-	# red.guardar_partida([[1, 2, 3, 4], [5, 6, 7, 8], [1, 3, 5, 7], [2, 4, 6, 8], '-1'], 'test.npz')
-	# resultado, instancias = red.cargar_partida('test.npz-1')
-	# print(resultado)
-	# print(instancias)
-
-	# Test fordwardpropagation_z
-	x = [[1, 2, 3], [0, 0, 0]]
-	red1 = RedNeuronal([3, 3, 1])
-	print(red1.forwardpropagation_z(x))
-	red2 = RedNeuronal([3, 1])
-	z = red2.forwardpropagation_z(x)
-	print(z[-1])
-	print(z[-1].shape)
-	red3 = RedNeuronal([3, 7, 9, 8, 5, 2])
-	z = red3.forwardpropagation_z(x)
-	print(z[-1])
-	print(z[-1].shape)
-
 	# Test backpropagation
-	red = RedNeuronal([85, 10, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
+	red = RedNeuronal([85, 20, 10, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
+	print(len(red.capas))
+	print(red.capas[0].shape)
+	print(red.capas[1].shape)
+	print(red.capas[2].shape)
 	red.backpropagation('partida1.npz0')
