@@ -16,18 +16,45 @@ def tanh(arr):
 
 
 """
+Aplicar la función de activación seleccionada.
+"""
+def activation_function(fun, arr):
+	if fun == 'sigmoid':
+		x = sigmoid(arr)
+	elif fun == 'tanh':
+		x = tanh(arr)
+	else:
+		raise Exception('Utils.py: invalid activation function in activation_function')
+	return x
+
+
+"""
+Aplicar la derivada de la función de activación seleccionada. Los valores del arreglo arr son los valores de
+activación (resultado de aplicar la función de activación). Se aprovecha que las derivadas de tanh y sigmoid
+se pueden expresar en función de esos valores, para reducir la cantidad de cálculos.
+"""
+def d_activation_function(fun, arr):
+	if fun == 'sigmoid':
+		x = d_sigmoid(arr)
+	elif fun == 'tanh':
+		x = d_tanh(arr)
+	else:
+		raise Exception('Utils.py: invalid activation function in activation_function')
+	return x
+
+
+"""
 Aplicar la derivada de la función Sigmoide a cada elemento de un arreglo numpy.
 """
 def d_sigmoid(arr):
-	s = sigmoid(arr)
-	return s * (1 - s)
+	return arr * (1 - arr)
 
 
 """
 Aplicar la derivada de la función tangente hiperbolica a cada elemento de un arreglo numpy.
 """
 def d_tanh(arr):
-	return 1 - (np.tanh(arr) ** 2)
+	return 1 - (arr ** 2)
 
 
 """
