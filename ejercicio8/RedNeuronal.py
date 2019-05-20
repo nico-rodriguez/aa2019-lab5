@@ -8,7 +8,7 @@ import os
 
 class RedNeuronal(object):
 	def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, batch_size=10,
-				 learning_rate=0.01, regularization=0.5, momentum=0.9):
+				 learning_rate=0.01, regularization=0.5, momentum=0.9, epsilon=1e-6):
 		# Inicializar capas y neuronas de la red
 		if not isinstance(neuronas, str):
 			print('[-] Inicializando neuronas de la red con valores aleatorios')
@@ -31,6 +31,7 @@ class RedNeuronal(object):
 		self.learning_rate = learning_rate
 		self.regularization = regularization
 		self.momentum = momentum
+		self.epsilon = epsilon
 		self.numero_neuronas = sum(neuronas)
 
 	# Recibe una instancia y devuelve una valoración del tablero.
@@ -53,12 +54,14 @@ class RedNeuronal(object):
 		x = np.array(input)
 		x = Utils.reshape_array(x)
 		a = [x]
+		# a = [Utils.extend_array(x)]
 		# Aplicar la función de acivación seleccionada en cada capa intermedia
 		for i in range(len(self.capas) - 1):
 			capa = self.capas[i]
 			x = Utils.extend_array(x)
 			x = Utils.activation_function(self.activation_function, capa.dot(x))
 			a.append(x)
+			# a.append(Utils.extend_array(x))
 		# Aplicar siempre tanh a la última capa, para obtener un resultado en [-1,1]
 		ultima_capa = self.capas[-1]
 		x = Utils.extend_array(x)
@@ -87,7 +90,7 @@ class RedNeuronal(object):
 	# Aplicar el algoritmo de backpropagation sobre el archivo de instancias seleccionado.
 	# Devuelve el error total y promedio que se cometió en la evaluación, junto con el error total y promedio
 	# de las capas de la red.
-	def backpropagation(self, archivo_instancias):
+	def backpropagation(self, archivo_instancias, check_gradient=False):
 		print('[-] Comenzando backpropagation')
 		resultado, instancias = self.cargar_partida(archivo_instancias)
 		numero_instancias = instancias.shape[0]
@@ -97,6 +100,7 @@ class RedNeuronal(object):
 		y = np.array(y).reshape(1, len(y))
 		total_delta = 0
 		total_loss = 0
+		total_gradient = []
 		for iter in range(numero_instancias, 0, -1):
 			# Calcular el (mini) batch para la instancia número 'iter'
 			if iter - self.batch_size < 0:
@@ -114,25 +118,57 @@ class RedNeuronal(object):
 			total_delta += delta_salida
 
 			# Ajustar los pesos de cada capa
-			delta_l_anterior = delta_salida
+			delta_l_anterior = np.array(delta_salida)
 			for l in range(len(self.capas) - 1, -1, -1):
-				# Calcular delta de la capa actual
-				capa_l = self.capas[l][:, 1:]
-				delta_l_actual = capa_l.T.dot(delta_l_anterior)
-				delta_l_actual *= Utils.d_activation_function(self.activation_function, a[l])
-				total_delta += np.sum(delta_l_actual)
 				# Calcular el gradiente sobre los pesos de la capa actual
-				gradiente = delta_l_actual * a[l]
+				capa_l = self.capas[l]
+				gradiente = delta_l_anterior * Utils.extend_array(a[l]).T
+				# gradiente = delta_l_anterior * a[l].T
+				# print('aca', Utils.extend_array(a[l]).T.shape)
+				# print(delta_l_anterior.shape)
+				# print(gradiente.shape)
+				# print(capa_l.shape)
+				if check_gradient and iter == numero_instancias:
+					total_gradient.append(gradiente)
 				# Ajustar pesos de la capa actual
-				self.descenso_gradiente(capa_l, gradiente.T)
-				delta_l_anterior = delta_l_actual
+				self.descenso_gradiente(capa_l, gradiente)
+				# Calcular delta de la capa actual
+				delta_l_actual = capa_l.T.dot(delta_l_anterior)
+				# delta_l_actual *= Utils.d_activation_function(self.activation_function, a[l])
+				delta_l_actual *= Utils.d_activation_function(self.activation_function, Utils.extend_array(a[l]))
+				total_delta += np.sum(delta_l_actual)
+				if delta_l_actual.ndim == 2:
+					delta_l_anterior = delta_l_actual[1:, :]
+				else:
+					delta_l_anterior = delta_l_actual
 			y *= self.factor_descuento
+
+			if check_gradient and iter == numero_instancias:
+				self.gradient_checking(instancias[iter-1], total_gradient)
+				total_gradient = []
 
 		print('    Total loss: {err}'.format(err=total_loss))
 		print('    Avg. loss: {err}'.format(err=total_loss / numero_instancias))
 		print('    Total delta: {err}'.format(err=total_delta))
 		print('    Avg. delta: {err}'.format(err=total_delta / (self.numero_neuronas + numero_instancias)))
 		return delta_salida, total_loss, total_loss / self.numero_neuronas
+
+	def gradient_checking(self, input, gradient):
+		error = 0
+		for i in range(len(gradient)):
+			j = len(gradient) - 1 - i
+			# print(gradient[j].shape)
+			# print(self.capas[i].shape)
+			for x, y in np.ndindex(gradient[j].shape):
+				self.capas[i][x, y] += self.epsilon
+				a_mas_epsilon = self.forwardpropagation(input)
+				self.capas[i][x, y] -= 2 * self.epsilon
+				a_menos_epsilon = self.forwardpropagation(input)
+				self.capas[i][x, y] += self.epsilon
+				aproximate_derivative = ((a_mas_epsilon - a_menos_epsilon) / (2 * self.epsilon))
+				error += (gradient[j][x, y] - aproximate_derivative) ** 2
+		error = np.sqrt(error)[0, 0]
+		print('    Gradient Cheking error: {err}'.format(err=error))
 
 	def descenso_gradiente(self, pesos, gradiente):
 		if self.momentum is None:
@@ -142,19 +178,19 @@ class RedNeuronal(object):
 		if self.regularization is not None:
 			pesos -= self.regularization * self.learning_rate * pesos
 
+
 def guardar_red(archivo_pesos):
 	print('[-] Guardando la red neuronal en "{file}"'.format(file=archivo_pesos))
 	pass
+
 
 def cargar_red(archivo_pesos):
 	print('[-] Cargandp la red neuronal del archivo "{file}"'.format(file=archivo_pesos))
 	pass
 
+
 if __name__ == '__main__':
 	# Test backpropagation
-	red = RedNeuronal([85, 20, 10, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
-	print(len(red.capas))
-	print(red.capas[0].shape)
-	print(red.capas[1].shape)
-	print(red.capas[2].shape)
-	red.backpropagation('partida1.npz0')
+	red = RedNeuronal([85, 8, 8, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
+	red.backpropagation('partida1.npz-1', False)
+	red.backpropagation('partida1.npz-1', True)
