@@ -162,18 +162,20 @@ if __name__ == '__main__':
         print("[-] Partida {partida} => Ganó {ganador}.".format(partida=i+1, ganador=ganador))
         if ganador is None:
             empates += 1
-            resultado = '0'
         elif ganador == 'Red Neuronal':
             victorias += 1
-            resultado = '1'
-        else:
-            resultado = '-1'
+
 
         print("[-] Victorias = {victorias}".format(victorias=victorias))
         print("[-] Empates = {empates}".format(empates=empates))
 
         jugador1.red_neuronal.backpropagation(jugador1.directorio_instancias +
-                                              '/partida{num_partida}.npz{res}'.format(num_partida=jugador1.contador_partidas-1, res=resultado), (i+1) % 10 == 0)
+                                              '/partida{num_partida}.npz'.format(
+                                                  num_partida=jugador1.contador_partidas-1),
+                                              jugador1.directorio_instancias +
+                                              '/eval{num_partida}.txt'.format(
+                                                  num_partida=jugador1.contador_partidas - 1),
+                                              (i+1) % 10 == 0)
 
     print("[*] La Red Neuronal ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
     print("[*] La Red Neuronal empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))

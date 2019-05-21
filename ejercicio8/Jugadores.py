@@ -1,7 +1,6 @@
 from abc import abstractmethod
 import random
 from ejercicio8.Tablero import *
-import numpy as np
 
 class Jugador(object):
 
@@ -254,6 +253,7 @@ class Red(Jugador):
         self.directorio_instancias = directorio_instancias
         self.contador_partidas = 1
         self.partida = []
+        self.eval = []
 
     # Devuelve el tablero que resulta de efectuar la mejor jugada según la estrategia del jugador
     def mejor_jugada(self, tablero):
@@ -262,6 +262,7 @@ class Red(Jugador):
         valoracion_maxima = None
         movimientos_maximos = []
         archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
+        archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
         for ficha in fichas:
             for movimiento in tablero.posibles_movimientos(ficha):
                 nuevo_posible_tablero = tablero.copy()
@@ -277,9 +278,11 @@ class Red(Jugador):
                         instancia.append(movimiento_maximo[0])
                         instancia.append(movimiento_maximo[1])
                         self.partida.append(instancia)
-                        self.partida.append('1')
+                        self.eval.append(1)
                         self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+                        self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
                         self.partida = []
+                        self.eval = []
                         self.contador_partidas += 1
                     return
                 else:
@@ -288,7 +291,7 @@ class Red(Jugador):
                     instancia.append(ficha[1])
                     instancia.append(movimiento[0])
                     instancia.append(movimiento[1])
-                    valoracion = self.red_neuronal.forwardpropagation(instancia)
+                    valoracion = self.red_neuronal.forwardpropagation(instancia)[0][0]
                     if valoracion_maxima is None or valoracion > valoracion_maxima:
                         valoracion_maxima = valoracion
                         ficha_maxima = ficha
@@ -306,21 +309,28 @@ class Red(Jugador):
             instancia.append(movimientos_maximos[jugada_azar][1][0])
             instancia.append(movimientos_maximos[jugada_azar][1][1])
             self.partida.append(instancia)
+            self.eval.append(valoracion_maxima*self.red_neuronal.factor_descuento)
         tablero.actualizar_tablero(movimientos_maximos[jugada_azar][0], movimientos_maximos[jugada_azar][1], self.color)
         return
 
     def perdi(self, tablero):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
-            self.partida.append('-1')
+            archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
             self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+            self.eval.append(-1)
+            self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
             self.partida = []
+            self.eval = []
             self.contador_partidas += 1
 
     def empate(self):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
-            self.partida.append('0')
+            archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
             self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
+            self.eval.append(0)
+            self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
             self.partida = []
+            self.eval = []
             self.contador_partidas += 1
