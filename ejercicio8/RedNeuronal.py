@@ -153,8 +153,8 @@ class RedNeuronal(object):
         error = 0
         for i in range(len(gradient)):
             j = len(gradient) - 1 - i
-            # print(gradient[j].shape)
-            # print(self.capas[i].shape)
+            print(gradient[j].shape)
+            print(self.capas[i].shape)
             for x, y in np.ndindex(gradient[j].shape):
                 self.capas[i][x, y] += self.epsilon
                 a_mas_epsilon = self.forwardpropagation(input)
@@ -163,15 +163,16 @@ class RedNeuronal(object):
                 self.capas[i][x, y] += self.epsilon
                 aproximate_derivative = ((a_mas_epsilon - a_menos_epsilon) / (2 * self.epsilon))
                 error += (gradient[j][x, y] - aproximate_derivative) ** 2
+                print((gradient[j][x, y] - aproximate_derivative) ** 2)
         error = np.sqrt(error)[0, 0]
         print('    Gradient Cheking error: {err}'.format(err=error))
 
     def descenso_gradiente(self, pesos, gradiente):
-        if self.momentum is None:
+        if self.momentum == 0:
             pesos -= self.learning_rate * gradiente
         else:
             pesos -= self.learning_rate * (self.momentum*pesos + (1 - self.momentum)*gradiente)
-        if self.regularization is not None:
+        if self.regularization != 0:
             pesos -= self.regularization * self.learning_rate * pesos
 
 
@@ -187,7 +188,6 @@ def cargar_red(archivo_pesos):
 
 if __name__ == '__main__':
     # Test backpropagation
-    red = RedNeuronal([85, 8, 8, 1], 'tanh', 0.9, 2, 0.01, 0.5, 0.9)
+    red = RedNeuronal([85, 8, 8, 1], 'sigmoid', 0.9, 10, 0.01, 0.5, 0.9)
     # red.backpropagation('partida1.npz-1', False)
-    # red.backpropagation('partida1.npz-1', True)
-    print(red.cargar_evaluaciones('a200/eval1.txt'))
+    red.backpropagation('partida1.npz', 'eval1.txt', True)
