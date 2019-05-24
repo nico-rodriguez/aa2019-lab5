@@ -1,6 +1,7 @@
 from ejercicio8.Juego import *
 from ejercicio8.Jugadores import *
 import os
+import sys
 import ejercicio8.RedNeuronal as RedNeuronal
 import ejercicio8.Utils as Utils
 import ast
@@ -12,15 +13,13 @@ El formato del archivo es el siguiente:
 [nombre directorio]     #nombre del directorio en donde se guardan los resultados
 [oponente]              #ruta a un archivo con pesos o "Aleatorio"
 [número de partidas]    #cantidad de partidas de entrenamiento
-[pesos red]             #archivo con los pesos de la red neuronal o una lista con la cantidad de neuronas de cada capa
-                        #(sin incluir las neuronas de sesgo).
+[pesos red]             #archivo con los pesos de la red neuronal o una tupla con la cantidad de neuronas de cada capa
+                        #interna (sin incluir las neuronas de sesgo).
 [función de activación] #'tanh' o 'sigmoid'
 [factor de descuento]   #factor de descuento de la función Q
 [batch size]            #tamaño del batch para el aprendizaje
 [learning rate]         #taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente)
 [regularization]        #factor de regularización de los pesos de la red (0 para deshabilitar)
-[momentum]              #factor de momentum para la actualización de los pesos en el descenso por gradiente (0 para deshabilitar)
-[epsilon]               #valor de epsilon para el gradient checking (0 para deshabilitar). El gradien checking se hace cada 50 jugadas
 """
 
 '''
@@ -30,7 +29,7 @@ Imprime en consola el número de partidas ganadas por el jugador que usa la red 
 
 if __name__ == '__main__':
     directorio, oponente, num_partidas, red, activation_function, discount_rate,\
-    batch_size, iter_num, learning_rate, regularization = Utils.parsear_conf('Training.conf')
+    batch_size, iter_num, learning_rate, regularization = Utils.parsear_conf(sys.argv[1])
 
     if oponente != 'Aleatorio' and not os.path.isfile(oponente):
         print("***Valor incorrecto para el oponente. Debe ser 'Aleatorio' o un archivo con los pesos de una AI***")
