@@ -165,3 +165,4 @@ if __name__ == '__main__':
 
     print("[*] La Red Neuronal ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
     print("[*] La Red Neuronal empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))
+    print("[*] Guardando la red neuronal entrenada en {file}".format(file=jugador1.directorio_instancias + '/red.sav'))
