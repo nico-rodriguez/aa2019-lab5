@@ -30,7 +30,7 @@ Imprime en consola el número de partidas ganadas por el jugador que usa la red 
 
 if __name__ == '__main__':
     directorio, oponente, num_partidas, red, activation_function, discount_rate,\
-    batch_size, learning_rate, regularization, momentum, epsilon = Utils.parsear_conf('Training.conf')
+    batch_size, iter_num, learning_rate, regularization = Utils.parsear_conf('Training.conf')
 
     if oponente != 'Aleatorio' and not os.path.isfile(oponente):
         print("***Valor incorrecto para el oponente. Debe ser 'Aleatorio' o un archivo con los pesos de una AI***")
@@ -84,6 +84,14 @@ if __name__ == '__main__':
     else:
         print('[*] Tamaño de batch establecida en {batch}'.format(batch=batch_size))
 
+    iter_num = int(iter_num)
+    if iter_num <= 0:
+        print('***Valor incorrecto de número de iteraciones. Debe ser positivo***')
+        print(uso)
+        exit()
+    else:
+        print('[*] Número de iteraciones máximo para el aprendizaje establecido en {iter}'.format(iter=iter_num))
+
     learning_rate = float(learning_rate)
     if learning_rate < 0 or learning_rate > 1:
         print('***Valor inapropiado de tasa de aprendizaje. Se recomienda un valor entre 0 y 1***')
@@ -102,33 +110,13 @@ if __name__ == '__main__':
     else:
         print('[*] Tasa de regularización establecida en {tasa}'.format(tasa=regularization))
 
-    momentum = float(momentum)
-    if momentum <= 0 or momentum > 1:
-        print('***Valor incorrecto de tasa de momentum. Debe ser un valor entre 0 y 1 (o cero para deshabilitar esta funcionalidad)***')
-        print(uso)
-        exit()
-    elif momentum == 0:
-        print('[*] Valor de momentum establecido en cero. No se utilizará momentum durante el aprendizaje!')
-    else:
-        print('[*] Valor de momentum establecido en {tasa}'.format(tasa=momentum))
-
-    epsilon = float(epsilon)
-    if momentum < 1e-8 or momentum > 1:
-        print('***Valor inapropiado para el epsilon del Gradient Checking. Se recomienda un valor entre 1e-8 y 1 (o cero para deshabilitar esta funcionalidad)***')
-        print(uso)
-        exit()
-    elif epsilon == 0:
-        print('[*] Valor de epsilon para el gradient checking establecido en cero. No se utilizará gradient checking momentum durante el aprendizaje!')
-    else:
-        print('[*] Valor de epsilon para el gradient checking establecido en {epsilon}'.format(epsilon=epsilon))
-
     input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
     if len(input_key) > 0 and input_key[0] == 'q':
         exit()
 
     print("[*] Creando jugadores")
     print('[*] Cargando los pesos de la red neuronal')
-    red_neuronal = RedNeuronal.RedNeuronal(red, activation_function, discount_rate, batch_size, learning_rate, regularization, momentum, epsilon)
+    red_neuronal = RedNeuronal.RedNeuronal(red, activation_function, discount_rate, batch_size, learning_rate, regularization)
     jugador1 = Red(Color.Blancas, red_neuronal, True, directorio)
     if oponente != "Aleatorio":
         jugador2 = AI(Color.Negras, "AI", None, False, 0)
@@ -165,7 +153,6 @@ if __name__ == '__main__':
         elif ganador == 'Red Neuronal':
             victorias += 1
 
-
         print("[-] Victorias = {victorias}".format(victorias=victorias))
         print("[-] Empates = {empates}".format(empates=empates))
 
@@ -174,8 +161,7 @@ if __name__ == '__main__':
                                                   num_partida=jugador1.contador_partidas-1),
                                               jugador1.directorio_instancias +
                                               '/eval{num_partida}.txt'.format(
-                                                  num_partida=jugador1.contador_partidas - 1),
-                                              (i+1) % 10 == 0)
+                                                  num_partida=jugador1.contador_partidas - 1))
 
     print("[*] La Red Neuronal ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
     print("[*] La Red Neuronal empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))
