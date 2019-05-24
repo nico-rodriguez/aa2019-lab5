@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.neural_network import MLPRegressor
 import joblib
-import pickle
 
 
 class RedNeuronal(object):
