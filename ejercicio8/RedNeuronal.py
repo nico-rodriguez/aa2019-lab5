@@ -4,8 +4,8 @@ import joblib
 
 
 class RedNeuronal(object):
-    def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, num_iters=100, batch_size=32,
-                 learning_rate=0.001, regularization=0.5, momentum=0.9):
+    def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, num_iters=200, batch_size=32,
+                 learning_rate=0.0001, regularization=0.5, momentum=0.9):
         # Inicializar capas y neuronas de la red
         if not isinstance(neuronas, str):
             print('[-] Inicializando neuronas de la red con valores aleatorios')
@@ -43,7 +43,7 @@ class RedNeuronal(object):
         print('[-] Comenzando backpropagation')
         instancias = self.cargar_partida(archivo_instancias)
         evaluaciones = self.cargar_evaluaciones(archivo_evals)
-        self.mlp = self.mlp.partial_fit(instancias, evaluaciones)
+        self.mlp = self.mlp.fit(instancias, evaluaciones)
 
 
 def guardar_red(red, archivo_red):
