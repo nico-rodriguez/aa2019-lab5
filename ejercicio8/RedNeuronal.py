@@ -22,8 +22,7 @@ class RedNeuronal(object):
 
     # Recibe una instancia y devuelve una valoración del tablero.
     def forwardpropagation(self, input):
-        print(self.mlp.predict(input))
-        return self.mlp.predict(input)
+        return self.mlp.predict(np.array(input).reshape(1, -1))
 
     # Cargar la partida del archivo seleccionado.
     # Retorna las instancias en un arreglo numpy (a su vez, cada instancia es otro arreglo numpy).
