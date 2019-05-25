@@ -1,6 +1,8 @@
 from abc import abstractmethod
 import random
 from ejercicio8.Tablero import *
+import ejercicio8.Utils as Utils
+
 
 class Jugador(object):
 
@@ -20,7 +22,7 @@ class Jugador(object):
         pass
 
     @abstractmethod
-    def empate(self):
+    def empate(self, tablero):
         pass
 
 class Aleatorio(Jugador):
@@ -62,12 +64,13 @@ class Aleatorio(Jugador):
                 movimiento = random.choice(movimientos)
                 tablero.actualizar_tablero(mover_ficha, movimiento, self.color)
                 return tablero
+
     def perdi(self, tablero):
         return
     
 class AI(Jugador):
 
-    def __init__(self, color, nombre, pesos, entrenando, factor_aprendizaje):
+    def __init__(self, color, nombre, pesos, generando_corpus, factor_aprendizaje, directorio_instancias=None):
         super(AI, self).__init__(color, nombre)
         if pesos is None:
             self.pesos = []
@@ -75,12 +78,15 @@ class AI(Jugador):
                 self.pesos.append(1/8)
         else:
             self.pesos = pesos
-        self.entrenando = entrenando
+        self.generando_corpus = generando_corpus
         self.factor_aprendizaje = factor_aprendizaje
         self.color_oponente = Color.Negras if color == Color.Blancas else Color.Blancas
         self.archivo_entrenamiento = "entrenamiento.txt"
         self.archivo_pesos = None
-        self.tupla_entrenamiento_a_grabar = None
+        self.contador_partidas = 1
+        self.partida = []
+        self.eval = []
+        self.directorio_instancias = directorio_instancias
         
     # FUNCIONES DEL ALGORITMO
 
@@ -101,31 +107,34 @@ class AI(Jugador):
             return val
 
     def perdi(self, tablero):
-        if (self.entrenando):
-            valoracion_actual = self.valoracion(tablero.obtener_tupla())
-            self.tupla_entrenamiento_a_grabar += [valoracion_actual]
-            self.grabar_datos_en_disco(self.tupla_entrenamiento_a_grabar, self.archivo_entrenamiento)
-        self.tupla_entrenamiento_a_grabar = None
+        if self.generando_corpus:
+            archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
+            archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
+            Utils.guardar_partida(self.partida, archivo_instancias)
+            self.partida = []
+            self.eval[-1] = -1
+            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            self.eval = []
+            self.contador_partidas += 1
     
-    def empate(self):
-        if (self.entrenando):
-            print("Empate")
-            valoracion_actual = 0
-            self.tupla_entrenamiento_a_grabar += [valoracion_actual]
-            self.grabar_datos_en_disco(self.tupla_entrenamiento_a_grabar, self.archivo_entrenamiento)
-        self.tupla_entrenamiento_a_grabar = None
+    def empate(self, tablero):
+        if self.generando_corpus:
+            archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
+            archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
+            Utils.guardar_partida(self.partida, archivo_instancias)
+            self.partida = []
+            self.eval[-1] = 0
+            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            self.eval = []
+            self.contador_partidas += 1
 
     # Recibe un tablero y retorna para dicho tablero, el movimiento de la forma (ficha, movimiento)
     # Que tiene la mayor valoracion
     def mejor_jugada(self, tablero):
-        # grabar en disco los datos de entrenamiento
-        if (self.tupla_entrenamiento_a_grabar is not None and self.entrenando):
-            valoracion_actual = self.valoracion(tablero.obtener_tupla())
-            self.tupla_entrenamiento_a_grabar += [valoracion_actual]
-            self.grabar_datos_en_disco(self.tupla_entrenamiento_a_grabar, self.archivo_entrenamiento)
-            self.tupla_entrenamiento_a_grabar = []
-        self.tupla_entrenamiento_a_grabar = tablero.obtener_tupla().copy()
-        
+        if self.generando_corpus:
+            archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
+            archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
+
         # buscar jugada
         fichas = tablero.negras if self.color == Color.Negras else tablero.blancas
         valoracion_maxima = None
@@ -138,12 +147,19 @@ class AI(Jugador):
                     movimiento_maximo = movimiento
                     ficha_maxima = ficha
                     tablero.actualizar_tablero(ficha_maxima, movimiento_maximo, self.color)
-                    if self.entrenando:
-                        tupla_ganadora = tablero.obtener_tupla()
-                        v_train = self.valoracion(tupla_ganadora)
-                        self.tupla_entrenamiento_a_grabar += [v_train]
-                        self.grabar_datos_en_disco(self.tupla_entrenamiento_a_grabar, self.archivo_entrenamiento)
-                        self.tupla_entrenamiento_a_grabar = None
+                    if self.generando_corpus:
+                        instancia = tablero.tablero2lista()
+                        instancia.append(ficha_maxima[0])
+                        instancia.append(ficha_maxima[1])
+                        instancia.append(movimiento_maximo[0])
+                        instancia.append(movimiento_maximo[1])
+                        self.partida.append(instancia)
+                        Utils.guardar_partida(self.partida, archivo_instancias)
+                        self.partida = []
+                        self.eval.append(1)
+                        Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+                        self.eval = []
+                        self.contador_partidas += 1
                     return tablero
                 else:
                     valoracion = self.valoracion(nuevo_posible_tablero.obtener_tupla())
@@ -158,15 +174,15 @@ class AI(Jugador):
                         movimientos_maximos.append((ficha_maxima, movimiento_maximo))
         jugada_azar = random.choice(range(0, len(movimientos_maximos)))
         tablero.actualizar_tablero(movimientos_maximos[jugada_azar][0], movimientos_maximos[jugada_azar][1], self.color)
+        if self.generando_corpus:
+            instancia = tablero.tablero2lista()
+            instancia.append(movimientos_maximos[jugada_azar][0][0])
+            instancia.append(movimientos_maximos[jugada_azar][0][1])
+            instancia.append(movimientos_maximos[jugada_azar][1][0])
+            instancia.append(movimientos_maximos[jugada_azar][1][1])
+            self.partida.append(instancia)
+            self.eval.append(valoracion_maxima*factor_descuento)
         return tablero
-
-    # no es necesaria ahora?
-    def actualizar_pesos(self, v_train, v_tupla, tupla_tablero):
-        error_valoracion = (v_train - v_tupla)
-        self.pesos[0] = self.pesos[0] + self.factor_aprendizaje * error_valoracion
-        for i in range(len(tupla_tablero)):
-            self.pesos[i+1] = self.pesos[i+1] + self.factor_aprendizaje * error_valoracion * tupla_tablero[i]
-
 
 	# Parsea el archvio con los valores de entrenamiento y realiza el ajuste de mínimos cuadrados
     def ajuste_minimos_cuadrados(self):
@@ -279,8 +295,8 @@ class Red(Jugador):
                         instancia.append(movimiento_maximo[1])
                         self.partida.append(instancia)
                         self.eval.append(1)
-                        self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
-                        self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+                        Utils.guardar_partida(self.partida, archivo_instancias)
+                        Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
                         self.partida = []
                         self.eval = []
                         self.contador_partidas += 1
@@ -291,7 +307,7 @@ class Red(Jugador):
                     instancia.append(ficha[1])
                     instancia.append(movimiento[0])
                     instancia.append(movimiento[1])
-                    valoracion = self.red_neuronal.forwardpropagation(instancia)[0][0]
+                    valoracion = self.red_neuronal.forwardpropagation(instancia)[0]
                     if valoracion_maxima is None or valoracion > valoracion_maxima:
                         valoracion_maxima = valoracion
                         ficha_maxima = ficha
@@ -317,20 +333,20 @@ class Red(Jugador):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
             archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
-            self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
-            self.eval.append(-1)
-            self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            Utils.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
+            self.eval[-1] = -1
+            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
             self.eval = []
             self.contador_partidas += 1
 
-    def empate(self):
+    def empate(self, tablero):
         if self.entrenando:
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
             archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
-            self.red_neuronal.guardar_partida(self.partida, archivo_instancias)
-            self.eval.append(0)
-            self.red_neuronal.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            Utils.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
+            self.eval[-1] = 0
+            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
             self.eval = []
             self.contador_partidas += 1

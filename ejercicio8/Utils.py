@@ -96,5 +96,17 @@ def parsear_conf(archivo_conf):
 		params.append(re.match(r'^(.+)\s+#', line)[1].strip())
 	return params
 
+
+# Guardar la partida actual (tableros + movimientos realizados) en el archivo
+def guardar_partida(partida, archivo_instancias):
+	np.savez(archivo_instancias, np.array(partida))
+
+
+def guardar_evaluaciones(evals, archivo_evals):
+	with open(archivo_evals, 'w') as archivo:
+		for q in evals:
+			archivo.write(str(q) + '\n')
+
+
 if __name__ == '__main__':
 	print(parsear_conf('Training.conf'))
