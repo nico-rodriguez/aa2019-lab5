@@ -1,4 +1,6 @@
-BATCH --job-name=red_neuronal_1
+#!/bin/bash
+
+#SBATCH --job-name=red_neuronal_1
 #SBATCH --ntasks=1
 #SBATCH --mem=16384
 #SBATCH --time=48:00:00
