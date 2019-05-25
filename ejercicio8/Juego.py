@@ -1,4 +1,4 @@
-from ejercicio8.Tablero import *
+from Tablero import *
 
 class Juego:
 

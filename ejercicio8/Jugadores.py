@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import random
-from ejercicio8.Tablero import *
-import ejercicio8.Utils as Utils
+from Tablero import *
+import Utils as Utils
 
 
 class Jugador(object):
@@ -110,7 +110,7 @@ class AI(Jugador):
         if self.generando_corpus:
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
             archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
-            Utils.guardar_evaluaciones(self.partida, archivo_instancias)
+            Utils.guardar_partida(self.partida, archivo_instancias)
             self.partida = []
             self.eval[-1] = -1
             Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
@@ -183,14 +183,6 @@ class AI(Jugador):
             self.partida.append(instancia)
             self.eval.append(valoracion_maxima*factor_descuento)
         return tablero
-
-    # no es necesaria ahora?
-    # def actualizar_pesos(self, v_train, v_tupla, tupla_tablero):
-    #     error_valoracion = (v_train - v_tupla)
-    #     self.pesos[0] = self.pesos[0] + self.factor_aprendizaje * error_valoracion
-    #     for i in range(len(tupla_tablero)):
-    #         self.pesos[i+1] = self.pesos[i+1] + self.factor_aprendizaje * error_valoracion * tupla_tablero[i]
-
 
 	# Parsea el archvio con los valores de entrenamiento y realiza el ajuste de mínimos cuadrados
     def ajuste_minimos_cuadrados(self):
@@ -315,7 +307,7 @@ class Red(Jugador):
                     instancia.append(ficha[1])
                     instancia.append(movimiento[0])
                     instancia.append(movimiento[1])
-                    valoracion = self.red_neuronal.forwardpropagation(instancia)
+                    valoracion = self.red_neuronal.forwardpropagation(instancia)[0]
                     if valoracion_maxima is None or valoracion > valoracion_maxima:
                         valoracion_maxima = valoracion
                         ficha_maxima = ficha

@@ -93,7 +93,8 @@ def parsear_conf(archivo_conf):
 		conf_lines = conf.readlines()
 	params = []
 	for line in conf_lines:
-		params.append(re.match(r'^(.+)\s+#', line)[1].strip())
+		match = re.match(r'^(.+)\s+#', line).group(1).split()[0]
+		params.append(match)
 	return params
 
 

@@ -1,4 +1,4 @@
-from ejercicio8.Constantes import *
+from Constantes import *
 from enum import Enum
 from math import sqrt
 

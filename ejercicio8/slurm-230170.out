@@ -1,0 +1,33 @@
+/var/spool/slurm/d/job230170/slurm_script: line 12: /python_env/bin/activate: No such file or directory
+/var/spool/slurm/d/job230170/slurm_script: line 14: cd: AA/aa2019-lab5/ejercicio8: No such file or directory
+/clusteruy/home/ignacio.ferreira/.local/lib/python3.4/site-packages/sklearn/base.py:253: UserWarning: Trying to unpickle estimator MLPRegressor from version 0.21.1 when using version 0.20.3. This might lead to breaking code or invalid results. Use at your own risk.
+  UserWarning)
+[*] Oponente aleatorio seleccionado
+[*] Partidas del corpus inicial establecidas en 50
+[*] Se jugarán 10000 partidas de entrenamiento
+[*] Se cargará una red neuronal desde el archivo red.sav
+[*] Función de activación tanh seleccionada
+[*] Tasa de descuento establecida en 0.9
+[*] Tamaño de batch establecida en 32
+[*] Número de iteraciones máximo para el aprendizaje establecido en 200
+[*] Tasa de aprendizaje establecida en 0.0001
+[*] Tasa de regularización establecida en 0.0001
+[*] Tasa de momentum establecida en 0.9
+[*] Creando jugadores
+[*] Cargando los pesos de la red neuronal
+[-] Inicializando neuronas de la red con valores del archivo red.sav
+[-] Cargandp la red neuronal del archivo "red.sav"
+[-] Red neuronal inicializada
+[*] Se crea el directorio a10000
+[*] Entrenando la red neuronal con el corpus inicial
+[-] Comenzando backpropagation
+Traceback (most recent call last):
+  File "Training.py", line 169, in <module>
+    directorio_corpus + '/eval{num_partida}.txt'.format(num_partida=i))
+  File "/clusteruy/home/ignacio.ferreira/AA/aa2019-lab5/ejercicio8/RedNeuronal.py", line 44, in backpropagation
+    instancias = self.cargar_partida(archivo_instancias)
+  File "/clusteruy/home/ignacio.ferreira/AA/aa2019-lab5/ejercicio8/RedNeuronal.py", line 30, in cargar_partida
+    return np.load(archivo_instancias)['arr_0']
+  File "/clusteruy/home/ignacio.ferreira/.local/lib/python3.4/site-packages/numpy/lib/npyio.py", line 422, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/corpus/partida1.npz'

@@ -1,11 +1,12 @@
 import numpy as np
 from sklearn.neural_network import MLPRegressor
 import joblib
+import os
 
 
 class RedNeuronal(object):
-    def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, num_iters=100, batch_size=32,
-                 learning_rate=0.001, regularization=0.5, momentum=0.9):
+    def __init__(self, neuronas, activation_function='tanh', factor_descuento=0.9, num_iters=200, batch_size=32,
+                 learning_rate=0.0001, regularization=0.5, momentum=0.9):
         # Inicializar capas y neuronas de la red
         if not isinstance(neuronas, str):
             print('[-] Inicializando neuronas de la red con valores aleatorios')
@@ -15,15 +16,14 @@ class RedNeuronal(object):
                                     momentum=momentum)
         else:
             print('[-] Inicializando neuronas de la red con valores del archivo {file}'.format(file=neuronas))
-            cargar_red(neuronas)
+            self.mlp = cargar_red(neuronas)
 
         self.factor_descuento = factor_descuento
         print('[-] Red neuronal inicializada')
 
     # Recibe una instancia y devuelve una valoración del tablero.
     def forwardpropagation(self, input):
-        print(self.mlp.predict(input))
-        return self.mlp.predict(input)
+        return self.mlp.predict(np.array(input).reshape(1, -1))
 
     # Cargar la partida del archivo seleccionado.
     # Retorna las instancias en un arreglo numpy (a su vez, cada instancia es otro arreglo numpy).
@@ -44,7 +44,9 @@ class RedNeuronal(object):
         print('[-] Comenzando backpropagation')
         instancias = self.cargar_partida(archivo_instancias)
         evaluaciones = self.cargar_evaluaciones(archivo_evals)
-        self.mlp = self.mlp.partial_fit(instancias, evaluaciones)
+        self.mlp = self.mlp.fit(instancias, evaluaciones)
+        os.remove(archivo_instancias)
+        os.remove(archivo_evals)
 
 
 def guardar_red(red, archivo_red):

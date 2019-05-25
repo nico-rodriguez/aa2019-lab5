@@ -1,5 +1,5 @@
-from ejercicio8.Juego import *
-from ejercicio8.Jugadores import *
+from Juego import *
+from Jugadores import *
 import sys
 import os
 
