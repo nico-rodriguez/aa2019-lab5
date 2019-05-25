@@ -168,8 +168,6 @@ if __name__ == '__main__':
         os.mkdir(directorio)
     print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
-    print(jugador1.red_neuronal.mlp)
-
     print('[*] Entrenando la red neuronal con el corpus inicial')
     for i in range(1, num_corpus+1):
         jugador1.red_neuronal.backpropagation(directorio_corpus + '/partida{num_partida}.npz'.format(num_partida=i),
