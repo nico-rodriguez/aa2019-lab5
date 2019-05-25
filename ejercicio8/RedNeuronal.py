@@ -15,7 +15,7 @@ class RedNeuronal(object):
                                     momentum=momentum)
         else:
             print('[-] Inicializando neuronas de la red con valores del archivo {file}'.format(file=neuronas))
-            cargar_red(neuronas)
+            self.mlp = cargar_red(neuronas)
 
         self.factor_descuento = factor_descuento
         print('[-] Red neuronal inicializada')
