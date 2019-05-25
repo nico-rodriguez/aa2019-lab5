@@ -57,16 +57,6 @@ if __name__ == '__main__':
     print("[*] Comenzando la serie de partidas")
     for i in range(num_partidas):
         print("[-] Comenzando partida {num}".format(num=i+1))
-        # Crear archivo vacio para los valores de entrenamiento
-        try:
-            # Se agrega un timestamp al nombre del archivo para que queden ordenados
-            ruta_archivo_entrenamiento = directorio + "/" + "partida{num}".format(num=i+1) + ".txt"
-            open(ruta_archivo_entrenamiento, "w").close()
-            # Avisar a jugador cual es el archivo sobre el cual escribira las tuplas
-            jugador1.set_archivo_entrenamiento(ruta_archivo_entrenamiento)
-        except Exception as e:
-            print("Training.py: Error creando el archivo de entrenamiento")
-            raise e
         juego = Juego(jugador2, jugador1)
         ganador = juego.jugar(color_que_empieza)
         color_que_empieza = Color.Blancas if (color_que_empieza == Color.Negras) else Color.Negras
