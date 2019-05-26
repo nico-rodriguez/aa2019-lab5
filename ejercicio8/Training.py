@@ -44,13 +44,6 @@ if __name__ == '__main__':
     else:
         print('[*] Oponente AI seleccionado')
 
-    if not os.path.isdir(directorio_corpus):
-        print("***Valor incorrecto para el directorio del corpus.***")
-        print(uso)
-        exit()
-    else:
-        print('[*] Directorio de corpus inicial establecido en {dir}'.format(dir=directorio_corpus))
-
     num_corpus = int(num_corpus)
     if num_corpus <= 0:
         print("***Valor incorrecto para el número de partidas del corpus inicial. Debe ser un entero positivo***")
@@ -67,16 +60,24 @@ if __name__ == '__main__':
     else:
         print('[*] Se jugarán {num} partidas de entrenamiento'.format(num=num_partidas))
 
+    cargar_red = False
     if not os.path.isfile(red):
         red = ast.literal_eval(red)
         if isinstance(red, str):
-            print("***Valor incorrecto para la red neuronal. Debe ser una lista con la cantidad de neuronas en cada" +
+            print("***Valor incorrecto para la red neuronal. Debe ser una tupla con la cantidad de neuronas en cada" +
                   " capa (sin contar neuronas de sesgo) o un archivo con los valores de cada peso***")
             print(uso)
             exit()
         else:
             print('[*] Se creará una red neuronal con capas {capas}'.format(capas=red))
+            if not os.path.isdir(directorio_corpus):
+                print("***Valor incorrecto para el directorio del corpus.***")
+                print(uso)
+                exit()
+            else:
+                print('[*] Directorio de corpus inicial establecido en {dir}'.format(dir=directorio_corpus))
     else:
+        cargar_red = True
         print('[*] Se cargará una red neuronal desde el archivo {file}'.format(file=red))
 
     if activation_function != 'tanh' and activation_function != 'sigmoid':
@@ -138,9 +139,9 @@ if __name__ == '__main__':
     else:
         print('[*] Tasa de momentum establecida en {tasa}'.format(tasa=momentum))
 
-    input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
-    if len(input_key) > 0 and input_key[0] == 'q':
-        exit()
+    # input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
+    # if len(input_key) > 0 and input_key[0] == 'q':
+    #     exit()
 
     print("[*] Creando jugadores")
     print('[*] Cargando los pesos de la red neuronal')
@@ -168,10 +169,11 @@ if __name__ == '__main__':
         os.mkdir(directorio)
     print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
-    print('[*] Entrenando la red neuronal con el corpus inicial')
-    for i in range(1, num_corpus+1):
-        jugador1.red_neuronal.backpropagation(directorio_corpus + '/partida{num_partida}.npz'.format(num_partida=i),
-                                              directorio_corpus + '/eval{num_partida}.txt'.format(num_partida=i))
+    if not cargar_red:
+        print('[*] Entrenando la red neuronal con el corpus inicial')
+        for i in range(1, num_corpus+1):
+            jugador1.red_neuronal.backpropagation(directorio_corpus + '/partida{num_partida}.npz'.format(num_partida=i),
+                                                  directorio_corpus + '/eval{num_partida}.txt'.format(num_partida=i))
     print('[*] Entrenamiento inicial finalizado')
 
     print("[*] Comenzando la serie de partidas")
