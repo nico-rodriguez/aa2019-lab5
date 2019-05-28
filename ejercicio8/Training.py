@@ -206,6 +206,6 @@ if __name__ == '__main__':
     print("[*] Guardando la red neuronal entrenada en {file}".format(file=jugador1.directorio_instancias + '/red.sav'))
     RedNeuronal.guardar_red(jugador1.red_neuronal.mlp, jugador1.directorio_instancias + '/red.sav')
     # Para el cluster
-    with open(jugador1.directorio_instancias + '/out') as out:
+    with open(jugador1.directorio_instancias + '/out', 'w') as out:
         out.write('La Red Neuronal ganó el {porcentaje}% de las veces'.format(porcentaje=victorias/num_partidas*100))
         out.write('La Red Neuronal empató el {porcentaje}% de las veces'.format(porcentaje=empates/num_partidas*100))
