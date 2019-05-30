@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import random
-from ejercicio8.Tablero import *
-import ejercicio8.Utils as Utils
+from Tablero import *
+import Utils as Utils
 
 
 class Jugador(object):

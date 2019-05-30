@@ -1,9 +1,9 @@
-from ejercicio8.Juego import *
-from ejercicio8.Jugadores import *
+from Juego import *
+from Jugadores import *
 import os
 import sys
-import ejercicio8.RedNeuronal as RedNeuronal
-import ejercicio8.Utils as Utils
+import RedNeuronal as RedNeuronal
+import Utils as Utils
 import ast
 
 uso = """

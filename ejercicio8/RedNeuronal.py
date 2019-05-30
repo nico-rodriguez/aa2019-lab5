@@ -42,7 +42,7 @@ class RedNeuronal(object):
         # print('[-] Comenzando backpropagation')
         instancias = self.cargar_partida(archivo_instancias)
         evaluaciones = self.cargar_evaluaciones(archivo_evals)
-        self.mlp = self.mlp.fit(instancias, evaluaciones)
+        self.mlp = self.mlp.partial_fit(instancias, evaluaciones)
 
 
 def guardar_red(red, archivo_red):
