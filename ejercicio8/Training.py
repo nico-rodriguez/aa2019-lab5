@@ -17,7 +17,7 @@ El formato del archivo es el siguiente:
 [número de partidas]    #cantidad de partidas de entrenamiento
 [pesos red]             #archivo con los pesos de la red neuronal o una tupla con la cantidad de neuronas de cada capa
                         #interna (sin incluir las neuronas de sesgo).
-[función de activación] #'tanh' o 'sigmoid'
+[función de activación] #'tanh', 'logistic' o 'relu'
 [factor de descuento]   #factor de descuento de la función Q
 [batch size]            #tamaño del batch para el aprendizaje
 [iter_num]              #número máximo de iteraciones durante el aprendizaje
@@ -80,8 +80,8 @@ if __name__ == '__main__':
         cargar_red = True
         print('[*] Se cargará una red neuronal desde el archivo {file}'.format(file=red))
 
-    if activation_function != 'tanh' and activation_function != 'sigmoid':
-        print('***Valor incorrecto de función de activación. Debe ser "tanh" o "sigmoid"***')
+    if activation_function != 'tanh' and activation_function != 'logistic' and activation_function != 'relu':
+        print('***Valor incorrecto de función de activación. Debe ser "tanh", "logistic" o "relu"***')
         print(uso)
         exit()
     else:

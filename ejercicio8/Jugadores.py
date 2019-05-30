@@ -111,9 +111,14 @@ class AI(Jugador):
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
             archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
             Utils.guardar_partida(self.partida, archivo_instancias)
+
+            evaluaciones = [(-1)*(factor_descuento**p) for p in range(len(self.partida)-1, -1, -1)]
+
             self.partida = []
             self.eval[-1] = -1
-            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            # Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            Utils.guardar_evaluaciones(evaluaciones, archivo_evaluaciones)
+
             self.eval = []
             self.contador_partidas += 1
     
@@ -122,9 +127,14 @@ class AI(Jugador):
             archivo_instancias = self.directorio_instancias + '/partida{val}.npz'.format(val=self.contador_partidas)
             archivo_evaluaciones = self.directorio_instancias + '/eval{val}.txt'.format(val=self.contador_partidas)
             Utils.guardar_partida(self.partida, archivo_instancias)
+
+            evaluaciones = [0*(factor_descuento**p) for p in range(len(self.partida)-1, -1, -1)]
+
             self.partida = []
             self.eval[-1] = 0
-            Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            # Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+            Utils.guardar_evaluaciones(evaluaciones, archivo_evaluaciones)
+
             self.eval = []
             self.contador_partidas += 1
 
@@ -155,9 +165,14 @@ class AI(Jugador):
                         instancia.append(movimiento_maximo[1])
                         self.partida.append(instancia)
                         Utils.guardar_partida(self.partida, archivo_instancias)
+
+                        evaluaciones = [1 * (factor_descuento ** p) for p in range(len(self.partida)-1, -1, -1)]
+
                         self.partida = []
                         self.eval.append(1)
-                        Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+                        # Utils.guardar_evaluaciones(self.eval, archivo_evaluaciones)
+                        Utils.guardar_evaluaciones(evaluaciones, archivo_evaluaciones)
+
                         self.eval = []
                         self.contador_partidas += 1
                     return tablero
