@@ -10,9 +10,8 @@ class RedNeuronal(object):
         if not isinstance(neuronas, str):
             print('[-] Inicializando neuronas de la red con valores aleatorios')
             self.mlp = MLPRegressor(hidden_layer_sizes=neuronas, activation=activation_function, solver='adam',
-                                    alpha=regularization, batch_size=batch_size, learning_rate='constant',
-                                    learning_rate_init=learning_rate, max_iter=num_iters, verbose=True,
-                                    momentum=momentum)
+                                    alpha=regularization, batch_size=batch_size, learning_rate='adaptive',
+                                    learning_rate_init=learning_rate, max_iter=num_iters, momentum=momentum)
         else:
             print('[-] Inicializando neuronas de la red con valores del archivo {file}'.format(file=neuronas))
             self.mlp = cargar_red(neuronas)
@@ -40,7 +39,7 @@ class RedNeuronal(object):
     # Devuelve el error total y promedio que se cometió en la evaluación, junto con el error total y promedio
     # de las capas de la red.
     def backpropagation(self, archivo_instancias, archivo_evals):
-        print('[-] Comenzando backpropagation')
+        # print('[-] Comenzando backpropagation')
         instancias = self.cargar_partida(archivo_instancias)
         evaluaciones = self.cargar_evaluaciones(archivo_evals)
         self.mlp = self.mlp.fit(instancias, evaluaciones)
@@ -58,5 +57,6 @@ def cargar_red(archivo_red):
 
 if __name__ == '__main__':
     # Test backpropagation
-    red = RedNeuronal((8, 8, 1), 'tanh', 0.9, 100, 10, 0.01, 0.5, 0.9)
+    red = RedNeuronal((8,), 'tanh', 0.9, 100, 10, 0.01, 0.5, 0.9)
     red.backpropagation('partida1.npz', 'eval1.txt')
+    print(red.mlp.predict(np.zeros(85).reshape(1, -1)))
