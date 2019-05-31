@@ -9,7 +9,6 @@ uso = """
 Invocar como python3 Evaluador.py [config file]. El módulo recibe los parámetros de entrada desde el archivo de configuración.
 En ese archivo, cada argumento se define en una línea a parte.
 El formato del archivo es el siguiente:
-[nombre directorio]     #nombre del directorio en donde se guardan los resultados
 [oponente]              #ruta a un archivo con pesos o "Aleatorio"
 [número de partidas]    #cantidad de partidas de evaluación
 [pesos red]             #archivo con los pesos de la red neuronal, guardado luego de correr el módulo Training.py
@@ -21,7 +20,7 @@ Imprime en consola el número de partidas ganadas por el jugador que usa la red 
 '''
 
 if __name__ == '__main__':
-    directorio, oponente, num_partidas, red = Utils.parsear_conf(sys.argv[1])
+    oponente, num_partidas, red = Utils.parsear_conf(sys.argv[1])
 
     if oponente != 'Aleatorio' and not os.path.isfile(oponente):
         print("***Valor incorrecto para el oponente. Debe ser 'Aleatorio' o un archivo con los pesos de una AI***")
@@ -56,7 +55,7 @@ if __name__ == '__main__':
     print('[*] Cargando los pesos de la red neuronal')
     red_neuronal = RedNeuronal.RedNeuronal(neuronas=red)
     print('[*] Red neuronal cargada con éxito')
-    jugador1 = Red(Color.Blancas, red_neuronal, False, directorio)
+    jugador1 = Red(Color.Blancas, red_neuronal, False)
     if oponente != "Aleatorio":
         jugador2 = AI(Color.Negras, "AI", None, False, 0)
         print("[*] Cargando pesos de la AI oponente")
@@ -71,11 +70,6 @@ if __name__ == '__main__':
 
     victorias = 0
     empates = 0
-
-    # Crear un directorio para guardar los datos de entrenamiento
-    if not os.path.isdir(directorio):
-        os.mkdir(directorio)
-    print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
     print("[*] Comenzando la serie de partidas")
     color_que_empieza = Color.Blancas
@@ -94,13 +88,6 @@ if __name__ == '__main__':
 
         print("[-] Victorias = {victorias}".format(victorias=victorias))
         print("[-] Empates = {empates}".format(empates=empates))
-
-        jugador1.red_neuronal.backpropagation(jugador1.directorio_instancias +
-                                              '/partida{num_partida}.npz'.format(
-                                                  num_partida=jugador1.contador_partidas-1),
-                                              jugador1.directorio_instancias +
-                                              '/eval{num_partida}.txt'.format(
-                                                  num_partida=jugador1.contador_partidas - 1))
 
     print("[*] La Red Neuronal ganó el {porcentaje}% de las veces".format(porcentaje=victorias/num_partidas*100))
     print("[*] La Red Neuronal empató el {porcentaje}% de las veces".format(porcentaje=empates/num_partidas*100))

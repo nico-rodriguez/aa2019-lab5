@@ -139,9 +139,9 @@ if __name__ == '__main__':
     else:
         print('[*] Tasa de momentum establecida en {tasa}'.format(tasa=momentum))
 
-    # input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
-    # if len(input_key) > 0 and input_key[0] == 'q':
-    #     exit()
+    input_key = input("Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
+    if len(input_key) > 0 and input_key[0] == 'q':
+        exit()
 
     print("[*] Creando jugadores")
     print('[*] Cargando los pesos de la red neuronal')
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         for i in range(1, num_corpus+1):
             jugador1.red_neuronal.backpropagation(directorio_corpus + '/partida{num_partida}.npz'.format(num_partida=i),
                                                   directorio_corpus + '/eval{num_partida}.txt'.format(num_partida=i))
-    print('[*] Entrenamiento inicial finalizado')
+        print('[*] Entrenamiento inicial finalizado')
 
     print("[*] Comenzando la serie de partidas")
     color_que_empieza = Color.Blancas

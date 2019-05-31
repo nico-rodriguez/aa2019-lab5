@@ -52,6 +52,11 @@ if __name__ == '__main__':
     os.mkdir(directorio)
     print("[*] Se crea el directorio {dir}".format(dir=directorio))
 
+    input_key = input(
+        "Si algún valor de la configuración es incorrecto, presione 'q' para salir; presione ENTER para continuar...\n")
+    if len(input_key) > 0 and input_key[0] == 'q':
+        exit()
+
     color_que_empieza = Color.Blancas
 
     print("[*] Comenzando la serie de partidas")
