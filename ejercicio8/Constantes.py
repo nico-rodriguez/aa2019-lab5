@@ -7,6 +7,7 @@ parte_media_superior = []
 parte_media_inferior = []
 parte_media_central = []
 
+
 # Para generar la forma de estrella, se estructura la inicialización en cinco loops
 # La casilla central de la estrella corresponde a la posición (0,0)
 # Se usan coordenadas cartesianas (i,j)
