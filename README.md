@@ -55,3 +55,15 @@ El formato del archivo es el siguiente:
 | [learning rate] | taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente) |
 | [regularization] | factor de regularización de los pesos de la red (0 para deshabilitar) |
 | [momentum] | factor de momentum (0 para deshabilitar) |
+
+### Evaluación de la red neuronal
+Invocar como python3 Evaluador.py [config file]. El módulo recibe los parámetros de entrada desde el archivo de configuración.
+En ese archivo, cada argumento se define en una línea a parte, ver Evaluador.conf.
+
+El formato del archivo es el siguiente:
+
+| Parametro | Description |
+| --- | --- |
+| [oponente] | ruta a un archivo con pesos o "Aleatorio" |
+| [número de partidas] | cantidad de partidas de evaluación |
+| [pesos red] | archivo con los pesos de la red neuronal (archivo.sav). |
