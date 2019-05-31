@@ -1,12 +1,21 @@
-# Laboratorio 1 del curso Aprendizaje Automático 2019.
+# Laboratorio 5 del curso Aprendizaje Automático 2019
+
+# Ejercicio 4
+Se realiza un análisis del corpus "aquienvoto.uy", además de clasificadores para partidos y candidatos, utilizando validación cruzada y evaluando los mismos según varias métricas.
+El mismo fue generado en un notebook por las facilidad que el ambiente de jupyter brinda.
+
+# Ejercicio 8
 Se implementa un algoritmo de aprendizaje Q utilizando redes neuronales y los jugadores de la tarea 1.
 
 ## Jugadores
 Se agrega un jugador que utiliza una red neuronal a los de la tarea 1 (Aleatorio y AI con regresión lineal).
 
 ## Dependencias
-* python3 >= 3.5.2
-* python3-matplotlib <= 2.1.1
+* python3 >= 3.6.7
+* scikit-learn >= 0.21.2
+* pandas >= 0.24.2
+* joblib >= 0.13.2
+* numpy >= 1.16.3
 
 ## Modos de invocación
 
