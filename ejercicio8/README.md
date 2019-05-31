@@ -30,17 +30,20 @@ Invocar como python3 Training.py [config file]. El módulo recibe los parámetro
 En ese archivo, cada argumento se define en una línea a parte, ver Training.conf.
 
 El formato del archivo es el siguiente:
-[nombre directorio]     #nombre del directorio en donde se guardan los resultados
-[oponente]              #ruta a un archivo con pesos o "Aleatorio"
-[corpus]                #directorio del corpus inicial
-[tamaño corpus]         #tamaño del corpus inicial
-[número de partidas]    #cantidad de partidas de entrenamiento
-[pesos red]             #archivo con los pesos de la red neuronal (archivo.sav) o una tupla con la cantidad de neuronas de cada capa
-                        #interna (sin incluir las neuronas de sesgo).
-[función de activación] #'tanh', 'logistic' o 'relu'
-[factor de descuento]   #factor de descuento de la función Q
-[batch size]            #tamaño del batch para el aprendizaje
-[iter_num]              #número máximo de iteraciones durante el aprendizaje
-[learning rate]         #taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente)
-[regularization]        #factor de regularización de los pesos de la red (0 para deshabilitar)
-[momentum]              #factor de momentum (0 para deshabilitar)
+
+| Parametro | Description |
+| --- | --- |
+| [nombre directorio] | nombre del directorio en donde se guardan los resultados |
+| [oponente] | ruta a un archivo con pesos o "Aleatorio" |
+| [corpus] | directorio del corpus inicial |
+| [tamaño corpus] | tamaño del corpus inicial |
+| [número de partidas] | cantidad de partidas de entrenamiento |
+| [pesos red] | archivo con los pesos de la red neuronal (archivo.sav) o una tupla con la cantidad de neuronas de cada capa
+                        #interna (sin incluir las neuronas de sesgo). |
+| [función de activación] | 'tanh', 'logistic' o 'relu' |
+| [factor de descuento]  | factor de descuento de la función Q |
+| [batch size] | tamaño del batch para el aprendizaje |
+| [iter_num] | número máximo de iteraciones durante el aprendizaje |
+| [learning rate] | taza de aprendizaje (factor del tamaño del paso en el descenso por gradiente) |
+| [regularization] | factor de regularización de los pesos de la red (0 para deshabilitar) |
+| [momentum] | factor de momentum (0 para deshabilitar) |
