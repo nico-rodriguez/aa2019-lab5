@@ -38,8 +38,7 @@ El formato del archivo es el siguiente:
 | [corpus] | directorio del corpus inicial |
 | [tamaño corpus] | tamaño del corpus inicial |
 | [número de partidas] | cantidad de partidas de entrenamiento |
-| [pesos red] | archivo con los pesos de la red neuronal (archivo.sav) o una tupla con la cantidad de neuronas de cada capa
-                        #interna (sin incluir las neuronas de sesgo). |
+| [pesos red] | archivo con los pesos de la red neuronal (archivo.sav) o una tupla con la cantidad de neuronas de cada capa interna (sin incluir las neuronas de sesgo). |
 | [función de activación] | 'tanh', 'logistic' o 'relu' |
 | [factor de descuento]  | factor de descuento de la función Q |
 | [batch size] | tamaño del batch para el aprendizaje |
