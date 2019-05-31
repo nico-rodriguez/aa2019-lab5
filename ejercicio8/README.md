@@ -17,7 +17,7 @@ Invocar como python3 Corpus.py [archivo conf] donde
 
 ejemplo de confuguración:
 
-corpus                      #nombre del directorio en donde se guardan los resultados
+corpus                      *#nombre del directorio en donde se guardan los resultados
 pesos.txt                   #jugador 1 (nombre del archivo con los pesos de la regresion lineal)
 Aleatorio                   #jugador 2 (Aleatorio o AI)
 500                         #cantidad de partidos a generar
